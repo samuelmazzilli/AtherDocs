@@ -3,96 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AetherDocs Pro</title>
+    <title>AetherDocs | Studio Edition</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.min.js"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: { 
-                        bgBase: '#0d1117', bgPanel: '#161b22', borderMain: '#30363d', accent: '#2f81f7', textMain: '#c9d1d9', textMuted: '#8b949e'
-                    },
-                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
-                }
-            }
+            theme: { extend: { colors: { 
+                bgBase: '#0d1117', bgPanel: '#161b22', borderMain: '#30363d', accent: '#2f81f7', textMain: '#c9d1d9', textMuted: '#8b949e'
+            }, fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], serif: ['Merriweather', 'serif'] } } }
         }
     </script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-bgBase text-textMain h-screen w-screen overflow-hidden flex font-sans selection:bg-accent selection:text-white">
+<body class="bg-bgBase text-textMain h-screen w-screen overflow-hidden flex font-sans selection:bg-accent selection:text-white relative">
 
-    <aside id="sidebar" class="w-72 bg-bgPanel border-r border-borderMain flex flex-col shrink-0 transition-all duration-300 z-20 shadow-xl">
-        <div class="h-16 flex items-center justify-between px-5 border-b border-borderMain">
-            <div class="flex items-center gap-2 font-semibold text-gray-100 tracking-wide text-lg">
-                <i class="ph-fill ph-planet text-accent text-2xl"></i> AetherDocs
+    <div id="welcome-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-bgBase/95 backdrop-blur-md transition-all duration-500">
+        <div class="text-center flex flex-col items-center">
+            <div class="w-24 h-24 mb-6 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-[0_0_50px_rgba(47,129,247,0.3)]">
+                <i class="ph-fill ph-planet text-white text-5xl"></i>
             </div>
-        </div>
-        
-        <div class="p-4 flex flex-col gap-3 border-b border-borderMain">
-            <button id="btn-open-folder" class="w-full bg-accent hover:bg-blue-500 text-white py-2.5 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/20">
-                <i class="ph-bold ph-folder-open text-lg"></i> Apri Workspace (PC)
-            </button>
-            <button id="btn-new-file" class="w-full bg-bgBase hover:bg-gray-800 text-textMain border border-borderMain py-2 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all">
-                <i class="ph-bold ph-file-plus text-lg"></i> Nuovo File
+            <h1 class="text-4xl font-bold text-white mb-3 tracking-tight">AetherDocs <span class="text-accent">Studio</span></h1>
+            <p class="text-textMuted mb-10 text-lg max-w-md">Il tuo IDE per la scrittura. Nessun cloud, privacy totale. Apri una cartella per iniziare.</p>
+            <button id="btn-welcome-open" class="bg-accent hover:bg-blue-500 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-3 transition-all hover:scale-105 shadow-xl shadow-blue-500/20">
+                <i class="ph-bold ph-folder-open text-2xl"></i> Apri Workspace (PC)
             </button>
         </div>
+    </div>
 
-        <div class="px-5 py-3 text-[11px] font-bold text-textMuted tracking-wider">ESPLORA RISORSE</div>
+    <div id="app-workspace" class="flex w-full h-full opacity-0 pointer-events-none transition-opacity duration-500">
         
-        <div id="file-tree" class="flex-1 overflow-y-auto pb-4 custom-scrollbar text-[13px]">
-            <div class="text-center text-textMuted text-sm mt-10 italic px-4 flex flex-col items-center gap-2 opacity-60">
-                <i class="ph-thin ph-tree-structure text-4xl"></i>
-                Nessuna cartella aperta.
+        <aside id="sidebar" class="w-72 bg-bgPanel border-r border-borderMain flex flex-col shrink-0 z-20 shadow-2xl">
+            <div class="h-14 flex items-center justify-between px-5 border-b border-borderMain bg-[#010409]">
+                <div class="flex items-center gap-2 font-semibold text-gray-200 text-sm tracking-wide">
+                    <i class="ph-fill ph-planet text-accent text-lg"></i> ESPLORATORE
+                </div>
+                <button id="btn-new-file" class="text-textMuted hover:text-white transition-colors p-1 rounded hover:bg-gray-800" title="Nuovo File"><i class="ph-bold ph-file-plus text-lg"></i></button>
             </div>
-        </div>
-    </aside>
+            <div id="file-tree" class="flex-1 overflow-y-auto pb-4 custom-scrollbar text-[13px] pt-3 px-2"></div>
+        </aside>
 
-    <main class="flex-1 flex flex-col min-w-0 bg-bgBase relative">
-        <header class="h-16 bg-bgPanel/90 backdrop-blur-md border-b border-borderMain flex items-center justify-between px-6 z-10 shrink-0">
-            <div class="flex items-center gap-3 bg-bgBase px-4 py-2 rounded-md border border-borderMain shadow-sm">
-                <i class="ph-fill ph-file-text text-textMuted text-lg"></i>
-                <span id="current-file-name" class="text-sm font-medium truncate max-w-[200px]">Senza_Titolo</span>
-                <span id="save-status" class="ml-2 px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[10px] font-mono border border-gray-700">Offline</span>
-            </div>
+        <main class="flex-1 flex flex-col min-w-0 bg-bgBase relative">
             
-            <div class="flex items-center gap-3 relative group">
-                <button class="bg-bgBase hover:bg-gray-800 border border-borderMain text-textMain py-2 px-4 rounded-md text-sm font-medium flex items-center gap-2 transition-all">
-                    <i class="ph ph-export text-lg"></i> Esporta <i class="ph-bold ph-caret-down text-xs"></i>
-                </button>
-                <div class="absolute right-0 top-full mt-2 w-48 bg-bgPanel border border-borderMain rounded-md shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-1.5 z-50">
-                    <button id="exp-pdf" class="w-full text-left px-4 py-2.5 text-sm text-textMain hover:bg-accent hover:text-white flex items-center gap-3"><i class="ph ph-file-pdf text-lg"></i> In PDF</button>
-                    <button id="exp-md" class="w-full text-left px-4 py-2.5 text-sm text-textMain hover:bg-accent hover:text-white flex items-center gap-3"><i class="ph ph-markdown-logo text-lg"></i> In Markdown</button>
-                    <button id="exp-html" class="w-full text-left px-4 py-2.5 text-sm text-textMain hover:bg-accent hover:text-white flex items-center gap-3"><i class="ph ph-file-html text-lg"></i> In HTML</button>
+            <div id="tabs-container" class="h-10 bg-[#010409] flex overflow-x-auto custom-scrollbar-hidden border-b border-borderMain shrink-0 flex-nowrap pt-1 gap-[2px] px-2">
+                </div>
+
+            <div id="custom-toolbar" class="bg-bgPanel border-b border-borderMain px-4 py-2 flex items-center gap-2 flex-wrap z-10 shrink-0 shadow-md transition-all">
+                <span class="ql-formats toolbar-group">
+                    <select class="ql-font" title="Stile Font">
+                        <option selected>Standard</option><option value="serif">Elegante (Serif)</option><option value="monospace">Codice (Mono)</option>
+                    </select>
+                    <select class="ql-size" title="Dimensione Testo"></select>
+                </span>
+                <span class="ql-formats toolbar-group">
+                    <button class="ql-bold"></button><button class="ql-italic"></button><button class="ql-underline"></button><button class="ql-strike"></button>
+                </span>
+                <span class="ql-formats toolbar-group">
+                    <select class="ql-color" title="Colore Testo"></select><select class="ql-background" title="Evidenziatore"></select>
+                </span>
+                <span class="ql-formats toolbar-group">
+                    <button class="ql-header" value="1"></button><button class="ql-header" value="2"></button>
+                    <button class="ql-blockquote"></button><button class="ql-code-block"></button>
+                </span>
+                <span class="ql-formats toolbar-group">
+                    <button class="ql-list" value="ordered"></button><button class="ql-list" value="bullet"></button>
+                    <select class="ql-align" title="Allineamento"></select>
+                </span>
+                <span class="ql-formats toolbar-group" style="margin-right: auto;">
+                    <button class="ql-link"></button>
+                    <button id="btn-custom-media" title="Importa JPG, PNG o PDF" class="text-accent hover:text-blue-400">
+                        <i class="ph-bold ph-image text-[16px]"></i>
+                    </button>
+                    <button class="ql-clean" title="Rimuovi Formattazione"></button>
+                </span>
+
+                <div class="flex items-center relative group z-50">
+                    <button class="bg-[#21262d] hover:bg-gray-700 border border-borderMain text-textMain py-1.5 px-3 rounded-md text-xs font-semibold flex items-center gap-2 transition-all">
+                        <i class="ph-bold ph-export"></i> Esporta <i class="ph-bold ph-caret-down text-[10px]"></i>
+                    </button>
+                    <div class="absolute right-0 top-full mt-1 w-48 bg-bgPanel border border-borderMain rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-1">
+                        <button id="exp-docx" class="dropdown-item"><i class="ph-bold ph-file-doc text-blue-400 text-base"></i> Word (.docx)</button>
+                        <button id="exp-pdf" class="dropdown-item"><i class="ph-bold ph-file-pdf text-red-400 text-base"></i> PDF (.pdf)</button>
+                        <button id="exp-md" class="dropdown-item"><i class="ph-bold ph-markdown-logo text-gray-300 text-base"></i> Markdown (.md)</button>
+                        <button id="exp-html" class="dropdown-item"><i class="ph-bold ph-file-html text-orange-400 text-base"></i> HTML (.html)</button>
+                        <button id="exp-txt" class="dropdown-item"><i class="ph-bold ph-file-text text-gray-400 text-base"></i> Testo (.txt)</button>
+                    </div>
                 </div>
             </div>
-        </header>
 
-        <div class="flex-1 overflow-y-auto custom-scrollbar bg-[#090b0f] flex justify-center py-10 relative">
-            <div class="w-full max-w-[850px] min-h-[1056px] bg-bgBase border border-borderMain shadow-2xl rounded-sm flex flex-col mb-10 mx-6">
-                <div id="editor-container" class="flex-1"></div>
+            <div class="flex-1 overflow-y-auto custom-scrollbar bg-[#090b0f] flex justify-center py-10 relative">
+                <div id="no-file-open" class="absolute inset-0 flex flex-col items-center justify-center text-textMuted opacity-50 z-0">
+                    <i class="ph-thin ph-terminal-window text-6xl mb-4"></i>
+                    <p>Seleziona un file dall'albero per iniziare.</p>
+                </div>
+                <div id="editor-wrapper" class="w-full max-w-[850px] min-h-[1056px] bg-bgPanel border border-borderMain shadow-2xl flex flex-col mb-10 mx-6 opacity-0 pointer-events-none transition-opacity duration-300 relative z-10 rounded-sm">
+                    <div id="editor-container" class="flex-1"></div>
+                </div>
             </div>
-        </div>
 
-        <footer class="h-8 bg-bgPanel border-t border-borderMain flex items-center justify-between px-6 text-[11px] font-mono text-textMuted shrink-0">
-            <div class="flex gap-6">
-                <span id="stat-words">0 parole</span>
-                <span id="stat-chars">0 caratteri</span>
-            </div>
-            <div class="flex items-center gap-2 text-green-500">
-                <i class="ph-fill ph-check-circle"></i> Local FS API
-            </div>
-        </footer>
-    </main>
+            <footer class="h-7 bg-[#0d1117] border-t border-borderMain flex items-center justify-between px-4 text-[10px] font-mono text-textMuted shrink-0">
+                <div class="flex gap-4">
+                    <span id="stat-words">0 Parole</span>
+                    <span id="stat-chars">0 Caratteri</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span id="save-status" class="bg-gray-800 px-2 py-0.5 rounded text-gray-300">Pronto</span>
+                    <span class="text-green-500 flex items-center gap-1"><i class="ph-fill ph-check-circle"></i> Local FS</span>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <input type="file" id="media-input" accept=".jpg,.jpeg,.png,.pdf" class="hidden">
 
     <script type="module" src="app.js"></script>
 </body>
