@@ -1,0 +1,35 @@
+/* Scrollbars Premium invisibili ma funzionali */
+.custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border: 3px solid transparent; background-clip: padding-box; border-radius: 9999px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #484f58; border: 2px solid transparent; background-clip: padding-box; }
+
+/* Override Totale di Quill.js per il Foglio A4 Dark */
+.ql-toolbar.ql-snow {
+    border: none !important;
+    border-bottom: 1px solid #30363d !important;
+    background-color: #161b22 !important;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 16px 20px !important;
+    display: flex;
+    justify-content: center;
+    border-radius: 2px 2px 0 0;
+}
+.ql-container.ql-snow { border: none !important; font-family: 'Inter', sans-serif !important; font-size: 1.05rem !important; }
+.ql-editor { padding: 80px 100px !important; line-height: 1.8; color: #c9d1d9; }
+.ql-editor h1, .ql-editor h2, .ql-editor h3 { color: #ffffff; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; }
+.ql-editor.ql-blank::before { color: #8b949e; font-style: normal; left: 100px !important; }
+
+/* Colora le icone dell'editor */
+.ql-snow .ql-stroke { stroke: #8b949e !important; stroke-width: 1.5 !important; }
+.ql-snow .ql-fill, .ql-snow .ql-stroke.ql-fill { fill: #8b949e !important; }
+.ql-snow .ql-picker { color: #8b949e !important; }
+button:hover .ql-stroke, .ql-snow .ql-picker:hover { stroke: #c9d1d9 !important; color: #c9d1d9 !important; }
+button.ql-active .ql-stroke { stroke: #2f81f7 !important; }
+
+/* Stati Albero File */
+.file-active { background-color: rgba(47, 129, 247, 0.15) !important; color: #2f81f7 !important; font-weight: 500;}
+.tree-item { cursor: pointer; user-select: none; transition: background-color 0.1s; }
+.tree-item:hover:not(.file-active) { background-color: rgba(255,255,255,0.05); }

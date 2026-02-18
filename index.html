@@ -1,95 +1,99 @@
 <!DOCTYPE html>
-<html lang="it" data-theme="dark">
+<html lang="it" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AetherDocs | Next-Gen Workspace</title>
+    <title>AetherDocs Pro</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
-    
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
 
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/editor.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { 
+                        bgBase: '#0d1117', bgPanel: '#161b22', borderMain: '#30363d', accent: '#2f81f7', textMain: '#c9d1d9', textMuted: '#8b949e'
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div id="app">
-        <aside id="sidebar" class="sidebar">
-            <div class="sidebar-header">
-                <h2><i class="ph-fill ph-planet"></i> AetherDocs</h2>
-                <button id="btn-close-sidebar" class="icon-btn" title="Chiudi"><i class="ph ph-caret-left"></i></button>
+<body class="bg-bgBase text-textMain h-screen w-screen overflow-hidden flex font-sans selection:bg-accent selection:text-white">
+
+    <aside id="sidebar" class="w-72 bg-bgPanel border-r border-borderMain flex flex-col shrink-0 transition-all duration-300 z-20 shadow-xl">
+        <div class="h-16 flex items-center justify-between px-5 border-b border-borderMain">
+            <div class="flex items-center gap-2 font-semibold text-gray-100 tracking-wide text-lg">
+                <i class="ph-fill ph-planet text-accent text-2xl"></i> AetherDocs
             </div>
-            <div class="sidebar-actions">
-                <button id="btn-open-folder" class="btn primary"><i class="ph ph-folder-open"></i> Apri Workspace (PC)</button>
-                <button id="btn-new-file" class="btn secondary"><i class="ph ph-file-plus"></i> Nuovo File</button>
+        </div>
+        
+        <div class="p-4 flex flex-col gap-3 border-b border-borderMain">
+            <button id="btn-open-folder" class="w-full bg-accent hover:bg-blue-500 text-white py-2.5 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/20">
+                <i class="ph-bold ph-folder-open text-lg"></i> Apri Workspace (PC)
+            </button>
+            <button id="btn-new-file" class="w-full bg-bgBase hover:bg-gray-800 text-textMain border border-borderMain py-2 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all">
+                <i class="ph-bold ph-file-plus text-lg"></i> Nuovo File
+            </button>
+        </div>
+
+        <div class="px-5 py-3 text-[11px] font-bold text-textMuted tracking-wider">ESPLORA RISORSE</div>
+        
+        <div id="file-tree" class="flex-1 overflow-y-auto pb-4 custom-scrollbar text-[13px]">
+            <div class="text-center text-textMuted text-sm mt-10 italic px-4 flex flex-col items-center gap-2 opacity-60">
+                <i class="ph-thin ph-tree-structure text-4xl"></i>
+                Nessuna cartella aperta.
             </div>
-            <div class="file-tree-header">RISORSE LOCALI</div>
-            <div id="file-tree" class="file-tree">
-                <div class="empty-state">Nessuna cartella locale aperta.<br>I tuoi dati restano offline.</div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 bg-bgBase relative">
+        <header class="h-16 bg-bgPanel/90 backdrop-blur-md border-b border-borderMain flex items-center justify-between px-6 z-10 shrink-0">
+            <div class="flex items-center gap-3 bg-bgBase px-4 py-2 rounded-md border border-borderMain shadow-sm">
+                <i class="ph-fill ph-file-text text-textMuted text-lg"></i>
+                <span id="current-file-name" class="text-sm font-medium truncate max-w-[200px]">Senza_Titolo</span>
+                <span id="save-status" class="ml-2 px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[10px] font-mono border border-gray-700">Offline</span>
             </div>
-        </aside>
-
-        <main class="main-content">
-            <header class="topbar">
-                <div class="topbar-left">
-                    <button id="btn-open-sidebar" class="icon-btn hidden"><i class="ph ph-list"></i></button>
-                    <div class="file-info">
-                        <i class="ph ph-file-text"></i>
-                        <span id="current-file">Senza_Titolo.html</span>
-                        <span id="save-status" class="status-badge">Sincronizzato</span>
-                    </div>
+            
+            <div class="flex items-center gap-3 relative group">
+                <button class="bg-bgBase hover:bg-gray-800 border border-borderMain text-textMain py-2 px-4 rounded-md text-sm font-medium flex items-center gap-2 transition-all">
+                    <i class="ph ph-export text-lg"></i> Esporta <i class="ph-bold ph-caret-down text-xs"></i>
+                </button>
+                <div class="absolute right-0 top-full mt-2 w-48 bg-bgPanel border border-borderMain rounded-md shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-1.5 z-50">
+                    <button id="exp-pdf" class="w-full text-left px-4 py-2.5 text-sm text-textMain hover:bg-accent hover:text-white flex items-center gap-3"><i class="ph ph-file-pdf text-lg"></i> In PDF</button>
+                    <button id="exp-md" class="w-full text-left px-4 py-2.5 text-sm text-textMain hover:bg-accent hover:text-white flex items-center gap-3"><i class="ph ph-markdown-logo text-lg"></i> In Markdown</button>
+                    <button id="exp-html" class="w-full text-left px-4 py-2.5 text-sm text-textMain hover:bg-accent hover:text-white flex items-center gap-3"><i class="ph ph-file-html text-lg"></i> In HTML</button>
                 </div>
-                
-                <div class="topbar-right">
-                    <button id="btn-lofi" class="tool-btn" title="Rumore Bianco Focus"><i class="ph ph-headphones"></i> Focus</button>
-                    <button id="btn-typewriter" class="tool-btn" title="Suono Tastiera Meccanica"><i class="ph ph-keyboard"></i> ASMR</button>
-                    <button id="btn-zen" class="tool-btn" title="Modalità Immersiva"><i class="ph ph-corners-out"></i> Zen</button>
-                    
-                    <select id="theme-selector" class="select-css">
-                        <option value="dark">🌙 Dark Mode</option>
-                        <option value="light">☀️ Light Mode</option>
-                        <option value="cyberpunk">🚀 Cyberpunk</option>
-                        <option value="writer">🖋️ Classic Writer</option>
-                    </select>
-
-                    <div class="dropdown">
-                        <button class="btn primary"><i class="ph ph-export"></i> Esporta <i class="ph ph-caret-down"></i></button>
-                        <div class="dropdown-menu">
-                            <a href="#" id="exp-pdf"><i class="ph ph-file-pdf"></i> Esporta in PDF</a>
-                            <a href="#" id="exp-html"><i class="ph ph-file-html"></i> Esporta in HTML</a>
-                            <a href="#" id="exp-md"><i class="ph ph-markdown-logo"></i> Esporta in Markdown</a>
-                            <a href="#" id="exp-txt"><i class="ph ph-file-text"></i> Esporta in Testo</a>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <div class="editor-wrapper">
-                <div id="editor-container"></div>
             </div>
+        </header>
 
-            <footer class="statusbar">
-                <div class="status-left">
-                    <span id="word-count">0 Parole</span> <span class="divider"></span>
-                    <span id="char-count">0 Caratteri</span> <span class="divider"></span>
-                    <span id="read-time">0 min lettura</span>
-                </div>
-                <div class="status-right">
-                    <span><i class="ph ph-lock-key"></i> Native FileSystem API</span> <span class="divider"></span>
-                    <span>UTF-8</span>
-                </div>
-            </footer>
-        </main>
-    </div>
+        <div class="flex-1 overflow-y-auto custom-scrollbar bg-[#090b0f] flex justify-center py-10 relative">
+            <div class="w-full max-w-[850px] min-h-[1056px] bg-bgBase border border-borderMain shadow-2xl rounded-sm flex flex-col mb-10 mx-6">
+                <div id="editor-container" class="flex-1"></div>
+            </div>
+        </div>
 
-    <script type="module" src="js/main.js"></script>
+        <footer class="h-8 bg-bgPanel border-t border-borderMain flex items-center justify-between px-6 text-[11px] font-mono text-textMuted shrink-0">
+            <div class="flex gap-6">
+                <span id="stat-words">0 parole</span>
+                <span id="stat-chars">0 caratteri</span>
+            </div>
+            <div class="flex items-center gap-2 text-green-500">
+                <i class="ph-fill ph-check-circle"></i> Local FS API
+            </div>
+        </footer>
+    </main>
+
+    <script type="module" src="app.js"></script>
 </body>
 </html>
