@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AetherDocs | Studio Edition</title>
+    <title>AetherDocs | AI Cloud Edition</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
@@ -13,121 +13,159 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.min.js"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: { extend: { colors: { 
-                bgBase: '#0d1117', bgPanel: '#161b22', borderMain: '#30363d', accent: '#2f81f7', textMain: '#c9d1d9', textMuted: '#8b949e'
-            }, fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], serif: ['Merriweather', 'serif'] } } }
+                bgBase: '#0d1117', bgPanel: '#161b22', borderMain: '#30363d', accent: '#2f81f7', aiMain: '#a855f7', textMain: '#c9d1d9', textMuted: '#8b949e'
+            }, fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } }
         }
     </script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-bgBase text-textMain h-screen w-screen overflow-hidden flex font-sans selection:bg-accent selection:text-white relative">
 
-    <div id="welcome-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-bgBase/95 backdrop-blur-md transition-all duration-500">
-        <div class="text-center flex flex-col items-center">
-            <div class="w-24 h-24 mb-6 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-[0_0_50px_rgba(47,129,247,0.3)]">
+    <div id="welcome-screen" class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-bgBase/95 backdrop-blur-md transition-all duration-500">
+        <div id="welcome-main" class="text-center flex flex-col items-center">
+            <div class="w-24 h-24 mb-6 rounded-3xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center shadow-[0_0_60px_rgba(168,85,247,0.4)]">
                 <i class="ph-fill ph-planet text-white text-5xl"></i>
             </div>
-            <h1 class="text-4xl font-bold text-white mb-3 tracking-tight">AetherDocs <span class="text-accent">Studio</span></h1>
-            <p class="text-textMuted mb-10 text-lg max-w-md">Ora legge i DOCX nativamente e supporta 30+ formati file.</p>
-            <button id="btn-welcome-open" class="bg-accent hover:bg-blue-500 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-3 transition-all hover:scale-105 shadow-xl shadow-blue-500/20">
-                <i class="ph-bold ph-folder-open text-2xl"></i> Apri Workspace (PC)
-            </button>
+            <h1 class="text-4xl font-bold text-white mb-3 tracking-tight">AetherDocs <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">AI Cloud</span></h1>
+            <p class="text-textMuted mb-10 text-lg max-w-md">Workspace Locale + Cloud Sync zero-cost + Gemini Copilot.</p>
+            
+            <div class="flex gap-4">
+                <button id="btn-welcome-local" class="bg-[#161b22] border border-[#30363d] hover:border-blue-500 text-white px-6 py-4 rounded-xl font-semibold flex items-center gap-3 transition-all shadow-lg hover:scale-105">
+                    <i class="ph-bold ph-hard-drives text-2xl text-blue-400"></i> Apri PC Locale
+                </button>
+                <button id="btn-welcome-cloud" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-4 rounded-xl font-semibold flex items-center gap-3 transition-all shadow-lg shadow-purple-500/20 hover:scale-105">
+                    <i class="ph-bold ph-cloud text-2xl"></i> Aether Cloud Gratuito
+                </button>
+            </div>
+        </div>
+
+        <div id="cloud-modal" class="hidden flex-col items-center w-[400px] bg-[#161b22] p-8 rounded-2xl border border-[#30363d] shadow-2xl shadow-purple-900/20">
+            <h2 class="text-white font-bold text-xl mb-2 flex items-center gap-2"><i class="ph-fill ph-cloud text-purple-400"></i> Accesso Cloud</h2>
+            <p class="text-xs text-gray-400 mb-6 text-center leading-relaxed">Incolla un Token esistente per ripristinare i tuoi file, o creane uno nuovo gratuito.</p>
+            <input type="text" id="cloud-token-input" placeholder="Es. abc123def456..." class="w-full bg-[#010409] text-white text-sm font-mono border border-[#30363d] rounded-lg p-3 mb-6 outline-none focus:border-purple-500 transition-colors text-center">
+            <div class="flex gap-3 w-full">
+                <button id="btn-cloud-connect" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white py-2.5 rounded-lg font-semibold text-sm transition-all">Connetti</button>
+                <button id="btn-cloud-create" class="flex-1 border border-purple-500 text-purple-400 hover:bg-purple-600/10 py-2.5 rounded-lg font-semibold text-sm transition-all">Crea Nuovo</button>
+            </div>
+            <button id="btn-cloud-cancel" class="mt-6 text-xs text-gray-500 hover:text-white w-full transition-colors">Annulla</button>
         </div>
     </div>
 
-    <div id="app-workspace" class="flex w-full h-full opacity-0 pointer-events-none transition-opacity duration-500">
+    <div id="app-workspace" class="flex w-full h-full opacity-0 pointer-events-none transition-opacity duration-500 relative overflow-hidden">
         
-        <aside id="sidebar" class="w-[280px] bg-bgPanel border-r border-borderMain flex flex-col shrink-0 z-20 shadow-2xl">
-            <div class="h-12 flex items-center justify-between px-4 border-b border-borderMain bg-[#010409]">
-                <div class="flex items-center gap-2 font-semibold text-gray-200 text-xs tracking-wider">
-                    <i class="ph-fill ph-planet text-accent text-lg"></i> ESPLORATORE
-                </div>
-                <button id="btn-new-file" class="text-textMuted hover:text-white transition-colors p-1.5 rounded hover:bg-gray-800" title="Nuovo File"><i class="ph-bold ph-file-plus text-base"></i></button>
+        <aside id="sidebar" class="w-[280px] bg-bgPanel border-r border-borderMain flex flex-col shrink-0 z-20 shadow-2xl transition-all">
+            <div class="flex text-xs font-semibold bg-[#010409]">
+                <button id="tab-local" class="flex-1 py-3 border-b-2 border-accent text-white flex justify-center gap-2 items-center transition-all"><i class="ph-bold ph-folder"></i> Locale</button>
+                <button id="tab-cloud" class="flex-1 py-3 border-b-2 border-transparent text-gray-500 hover:text-purple-400 flex justify-center gap-2 items-center transition-all"><i class="ph-bold ph-cloud"></i> Cloud</button>
             </div>
+            
+            <div id="cloud-info" class="hidden flex-col p-3 border-b border-borderMain bg-[#0d1117] gap-2">
+                <span class="text-[10px] text-gray-500 font-mono uppercase tracking-wider">Cloud Token (Copialo!)</span>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="display-token" class="flex-1 bg-black border border-gray-700 rounded px-2 py-1.5 text-xs text-purple-300 font-mono" readonly>
+                    <button id="btn-copy-token" class="p-1.5 bg-gray-800 rounded hover:bg-gray-700 text-gray-300 transition-colors" title="Copia Token"><i class="ph-bold ph-copy"></i></button>
+                </div>
+            </div>
+
+            <div class="h-10 flex items-center justify-between px-4 border-b border-borderMain bg-[#0d1117]">
+                <span id="workspace-title" class="text-xs font-mono text-gray-400">DISCO LOCALE</span>
+                <button id="btn-new-file" class="text-textMuted hover:text-white p-1 rounded hover:bg-gray-800 transition-colors"><i class="ph-bold ph-file-plus text-base"></i></button>
+            </div>
+
             <div id="file-tree" class="flex-1 overflow-y-auto pb-4 custom-scrollbar text-[13px] pt-2 px-1"></div>
         </aside>
 
-        <main class="flex-1 flex flex-col min-w-0 bg-bgBase relative">
-            
+        <main class="flex-1 flex flex-col min-w-0 bg-bgBase relative transition-all duration-300" id="main-editor-area">
             <div id="tabs-container" class="h-10 bg-[#010409] flex overflow-x-auto custom-scrollbar-hidden border-b border-borderMain shrink-0 flex-nowrap pt-1 gap-[2px] px-2"></div>
 
-            <div class="bg-[#161b22] border-b border-[#30363d] px-4 py-2 flex items-center justify-between z-20 shrink-0 shadow-sm">
-                
+            <div class="bg-[#161b22] border-b border-[#30363d] px-4 py-2 flex items-center justify-between z-20 shrink-0 shadow-sm relative">
                 <div id="custom-toolbar" class="flex flex-wrap items-center gap-1 flex-1">
-                    <span class="ql-formats">
-                        <select class="ql-font"><option selected></option><option value="serif"></option><option value="monospace"></option></select>
-                        <select class="ql-size"></select>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-bold"></button><button class="ql-italic"></button><button class="ql-underline"></button><button class="ql-strike"></button>
-                    </span>
-                    <span class="ql-formats">
-                        <select class="ql-color"></select><select class="ql-background"></select>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-header" value="1"></button><button class="ql-header" value="2"></button>
-                        <button class="ql-blockquote"></button><button class="ql-code-block"></button>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-list" value="ordered"></button><button class="ql-list" value="bullet"></button>
-                        <select class="ql-align"></select>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-link"></button><button class="ql-clean"></button>
-                    </span>
+                    <span class="ql-formats"><select class="ql-font"><option selected></option><option value="monospace"></option></select><select class="ql-size"></select></span>
+                    <span class="ql-formats"><button class="ql-bold"></button><button class="ql-italic"></button><button class="ql-underline"></button></span>
+                    <span class="ql-formats"><select class="ql-color"></select><select class="ql-background"></select></span>
+                    <span class="ql-formats"><button class="ql-header" value="1"></button><button class="ql-header" value="2"></button><button class="ql-blockquote"></button><button class="ql-code-block"></button></span>
+                    <span class="ql-formats"><button class="ql-list" value="ordered"></button><button class="ql-list" value="bullet"></button></span>
                 </div>
 
                 <div class="flex items-center gap-3 border-l border-[#30363d] pl-4 ml-2">
-                    <button id="btn-custom-media" class="text-[#8b949e] hover:text-white transition-colors" title="Importa Immagine o PDF">
-                        <i class="ph-bold ph-image text-xl text-blue-400 hover:text-blue-300"></i>
-                    </button>
-                    
+                    <button id="btn-custom-media" class="text-gray-400 hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800" title="Importa PDF/Img"><i class="ph-bold ph-image text-lg"></i></button>
                     <div class="relative group">
-                        <button class="bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-white py-1.5 px-3 rounded text-sm font-semibold flex items-center gap-2 transition-all">
-                            <i class="ph-bold ph-export"></i> Esporta <i class="ph-bold ph-caret-down text-[10px]"></i>
-                        </button>
-                        <div class="absolute right-0 top-full mt-1 w-48 bg-[#161b22] border border-[#30363d] rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-1 z-50">
-                            <button id="exp-docx" class="dropdown-item"><i class="ph-bold ph-file-doc text-blue-400 text-base"></i> Word (.docx)</button>
-                            <button id="exp-pdf" class="dropdown-item"><i class="ph-bold ph-file-pdf text-red-400 text-base"></i> PDF (.pdf)</button>
-                            <button id="exp-md" class="dropdown-item"><i class="ph-bold ph-markdown-logo text-gray-300 text-base"></i> Markdown (.md)</button>
-                            <button id="exp-html" class="dropdown-item"><i class="ph-bold ph-file-html text-orange-400 text-base"></i> HTML (.html)</button>
-                            <button id="exp-txt" class="dropdown-item"><i class="ph-bold ph-file-text text-gray-400 text-base"></i> Testo (.txt)</button>
+                        <button class="text-gray-400 hover:text-green-400 transition-colors px-2 py-1 rounded hover:bg-gray-800 flex items-center gap-1 text-xs font-semibold"><i class="ph-bold ph-export text-lg"></i> Esporta <i class="ph-bold ph-caret-down"></i></button>
+                        <div class="absolute right-0 top-full mt-1 w-48 bg-[#161b22] border border-[#30363d] rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 py-1">
+                            <button id="exp-docx" class="dropdown-item"><i class="ph-bold ph-file-doc text-blue-400"></i> Word (.docx)</button>
+                            <button id="exp-pdf" class="dropdown-item"><i class="ph-bold ph-file-pdf text-red-400"></i> PDF (.pdf)</button>
+                            <button id="exp-md" class="dropdown-item"><i class="ph-bold ph-markdown-logo text-gray-300"></i> Markdown (.md)</button>
+                            <button id="exp-txt" class="dropdown-item"><i class="ph-bold ph-file-text text-gray-400"></i> Testo (.txt)</button>
                         </div>
                     </div>
+                    
+                    <button id="btn-toggle-ai" class="bg-purple-900/30 text-purple-400 hover:bg-purple-600 hover:text-white border border-purple-700/50 py-1.5 px-3 rounded text-sm font-bold flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(168,85,247,0.15)] ml-2">
+                        <i class="ph-fill ph-sparkle"></i> Aether AI
+                    </button>
                 </div>
-            </div>
-
-            <div id="unsupported-msg" class="absolute inset-0 flex flex-col items-center justify-center text-textMuted z-0 hidden bg-[#090b0f]">
-                <i class="ph-duotone ph-file-x text-6xl mb-4 text-red-500/50"></i>
-                <p class="text-lg text-white font-medium">Formato non supportato</p>
-                <p class="text-sm mt-2">I file binari pesanti non possono essere aperti direttamente.</p>
             </div>
 
             <div class="flex-1 overflow-y-auto custom-scrollbar bg-[#090b0f] flex justify-center py-10 relative">
-                <div id="no-file-open" class="absolute inset-0 flex flex-col items-center justify-center text-textMuted opacity-50 z-0">
-                    <i class="ph-thin ph-terminal-window text-6xl mb-4"></i>
-                    <p>Seleziona o crea un file dall'esploratore.</p>
+                
+                <div id="ghost-edit-widget" class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-[#1e1a2e]/95 border-2 border-aiMain shadow-[0_15px_40px_rgba(168,85,247,0.4)] rounded-xl p-3 z-50 flex items-center gap-4 hidden backdrop-blur-xl transition-all">
+                    <div class="text-white text-sm font-bold flex items-center gap-2 pl-2"><i class="ph-fill ph-magic-wand text-aiMain animate-pulse"></i> Modifica Generata</div>
+                    <div class="flex gap-2 border-l border-purple-500/30 pl-4">
+                        <button id="btn-ghost-reject" class="px-4 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/30 rounded-lg text-xs font-bold transition-all">Scarta ✕</button>
+                        <button id="btn-ghost-accept" class="px-4 py-2 bg-aiMain hover:bg-purple-500 text-white rounded-lg text-xs font-bold transition-all shadow-lg">Accetta ✓</button>
+                    </div>
                 </div>
-                <div id="editor-wrapper" class="w-full max-w-[850px] min-h-[1056px] bg-bgPanel border border-borderMain shadow-2xl flex flex-col mb-10 mx-6 opacity-0 pointer-events-none transition-opacity duration-300 relative z-10 rounded-sm">
-                    <div id="editor-container" class="flex-1"></div>
+
+                <div id="no-file-open" class="absolute inset-0 flex flex-col items-center justify-center text-textMuted opacity-50 z-0"><i class="ph-thin ph-terminal-window text-6xl mb-4"></i><p>Nessun file aperto.</p></div>
+                
+                <div id="editor-wrapper" class="w-full max-w-[850px] min-h-[1056px] bg-bgPanel border border-borderMain shadow-2xl flex flex-col mb-10 mx-6 opacity-0 pointer-events-none transition-all duration-300 relative z-10 rounded-sm">
+                    <div id="editor-container" class="flex-1 transition-all duration-300"></div>
+                </div>
+            </div>
+            
+            <footer class="h-6 bg-[#0d1117] border-t border-borderMain flex items-center justify-between px-4 text-[10px] font-mono text-textMuted shrink-0">
+                <div class="flex gap-4"><span id="stat-words">0 Parole</span><span id="stat-chars">0 Caratteri</span></div>
+                <div class="flex items-center gap-4"><span id="save-status" class="bg-gray-800 px-2 py-[1px] rounded text-gray-300">Pronto</span></div>
+            </footer>
+        </main>
+
+        <aside id="ai-sidebar" class="w-[350px] bg-[#0d1117] border-l border-[#30363d] flex flex-col shrink-0 z-30 shadow-2xl transform translate-x-full transition-transform duration-300 absolute right-0 top-0 bottom-0 h-full">
+            <div class="h-14 flex items-center justify-between px-4 border-b border-[#30363d] bg-[#161b22]">
+                <div class="flex items-center gap-2 font-bold text-gray-200 tracking-wide text-sm">
+                    <i class="ph-fill ph-sparkle text-purple-400 text-xl"></i> Aether Copilot
+                </div>
+                <button id="btn-close-ai" class="text-textMuted hover:text-white transition-colors p-1.5 rounded hover:bg-gray-800"><i class="ph-bold ph-x text-base"></i></button>
+            </div>
+            
+            <div class="p-2 bg-[#010409] border-b border-[#30363d] flex gap-2 overflow-x-auto custom-scrollbar-hidden">
+                <button class="ai-quick-btn shrink-0" data-prompt="Traduci il file in Inglese mantenendo la formattazione.">🇬🇧 Traduci EN</button>
+                <button class="ai-quick-btn shrink-0" data-prompt="Correggi errori grammaticali e rendi il testo professionale.">✨ Correggi Testo</button>
+                <button class="ai-quick-btn shrink-0" data-prompt="Crea un riassunto a punti di questo documento.">📝 Riassumi</button>
+            </div>
+
+            <div id="ai-chat-box" class="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-4 text-sm">
+                <div class="ai-msg bot">
+                    <i class="ph-fill ph-robot text-purple-400 text-lg mb-1 block"></i>
+                    Ciao! Posso leggere il tuo file in tempo reale.<br>
+                    Chiedimi di <b>"Tradurre"</b> o <b>"Correggere"</b>. Applicherò la modifica direttamente sul foglio centrale in attesa della tua approvazione!
                 </div>
             </div>
 
-            <footer class="h-6 bg-[#0d1117] border-t border-borderMain flex items-center justify-between px-4 text-[10px] font-mono text-textMuted shrink-0">
-                <div class="flex gap-4"><span id="stat-words">0 Parole</span><span id="stat-chars">0 Caratteri</span></div>
-                <div class="flex items-center gap-4">
-                    <span id="save-status" class="bg-gray-800 px-2 py-[1px] rounded text-gray-300">Pronto</span>
-                    <span class="text-green-500 flex items-center gap-1"><i class="ph-fill ph-check-circle"></i> Local FS Access</span>
-                </div>
-            </footer>
-        </main>
+            <div class="p-3 bg-[#010409] border-t border-[#30363d]">
+                <form id="ai-form" class="relative">
+                    <textarea id="ai-input" rows="2" class="w-full bg-[#161b22] text-white text-[13px] border border-[#30363d] rounded-lg pl-3 pr-10 py-2 focus:outline-none focus:border-purple-500 custom-scrollbar-hidden resize-none transition-colors" placeholder="Chiedi all'AI di agire sul testo..."></textarea>
+                    <button type="submit" id="btn-send-ai" class="absolute right-2 bottom-2 p-1.5 bg-purple-600 hover:bg-purple-500 rounded-md text-white transition-all shadow-lg"><i class="ph-bold ph-paper-plane-right"></i></button>
+                </form>
+            </div>
+        </aside>
+
     </div>
 
     <input type="file" id="media-input" accept=".jpg,.jpeg,.png,.pdf" class="hidden">
