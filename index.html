@@ -13,6 +13,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -33,7 +35,7 @@
                 <i class="ph-fill ph-planet text-white text-5xl"></i>
             </div>
             <h1 class="text-4xl font-bold text-white mb-3 tracking-tight">AetherDocs <span class="text-accent">Studio</span></h1>
-            <p class="text-textMuted mb-10 text-lg max-w-md">Il tuo IDE per la scrittura. Nessun cloud, privacy totale. Apri una cartella per iniziare.</p>
+            <p class="text-textMuted mb-10 text-lg max-w-md">Ora legge i DOCX nativamente e supporta 30+ formati file.</p>
             <button id="btn-welcome-open" class="bg-accent hover:bg-blue-500 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-3 transition-all hover:scale-105 shadow-xl shadow-blue-500/20">
                 <i class="ph-bold ph-folder-open text-2xl"></i> Apri Workspace (PC)
             </button>
@@ -42,89 +44,93 @@
 
     <div id="app-workspace" class="flex w-full h-full opacity-0 pointer-events-none transition-opacity duration-500">
         
-        <aside id="sidebar" class="w-72 bg-bgPanel border-r border-borderMain flex flex-col shrink-0 z-20 shadow-2xl">
-            <div class="h-14 flex items-center justify-between px-5 border-b border-borderMain bg-[#010409]">
-                <div class="flex items-center gap-2 font-semibold text-gray-200 text-sm tracking-wide">
+        <aside id="sidebar" class="w-[280px] bg-bgPanel border-r border-borderMain flex flex-col shrink-0 z-20 shadow-2xl">
+            <div class="h-12 flex items-center justify-between px-4 border-b border-borderMain bg-[#010409]">
+                <div class="flex items-center gap-2 font-semibold text-gray-200 text-xs tracking-wider">
                     <i class="ph-fill ph-planet text-accent text-lg"></i> ESPLORATORE
                 </div>
-                <button id="btn-new-file" class="text-textMuted hover:text-white transition-colors p-1 rounded hover:bg-gray-800" title="Nuovo File"><i class="ph-bold ph-file-plus text-lg"></i></button>
+                <button id="btn-new-file" class="text-textMuted hover:text-white transition-colors p-1.5 rounded hover:bg-gray-800" title="Nuovo File"><i class="ph-bold ph-file-plus text-base"></i></button>
             </div>
-            <div id="file-tree" class="flex-1 overflow-y-auto pb-4 custom-scrollbar text-[13px] pt-3 px-2"></div>
+            <div id="file-tree" class="flex-1 overflow-y-auto pb-4 custom-scrollbar text-[13px] pt-2 px-1"></div>
         </aside>
 
         <main class="flex-1 flex flex-col min-w-0 bg-bgBase relative">
             
-            <div id="tabs-container" class="h-10 bg-[#010409] flex overflow-x-auto custom-scrollbar-hidden border-b border-borderMain shrink-0 flex-nowrap pt-1 gap-[2px] px-2">
+            <div id="tabs-container" class="h-10 bg-[#010409] flex overflow-x-auto custom-scrollbar-hidden border-b border-borderMain shrink-0 flex-nowrap pt-1 gap-[2px] px-2"></div>
+
+            <div class="bg-[#161b22] border-b border-[#30363d] px-4 py-2 flex items-center justify-between z-20 shrink-0 shadow-sm">
+                
+                <div id="custom-toolbar" class="flex flex-wrap items-center gap-1 flex-1">
+                    <span class="ql-formats">
+                        <select class="ql-font"><option selected></option><option value="serif"></option><option value="monospace"></option></select>
+                        <select class="ql-size"></select>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-bold"></button><button class="ql-italic"></button><button class="ql-underline"></button><button class="ql-strike"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <select class="ql-color"></select><select class="ql-background"></select>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-header" value="1"></button><button class="ql-header" value="2"></button>
+                        <button class="ql-blockquote"></button><button class="ql-code-block"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-list" value="ordered"></button><button class="ql-list" value="bullet"></button>
+                        <select class="ql-align"></select>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-link"></button><button class="ql-clean"></button>
+                    </span>
                 </div>
 
-            <div id="custom-toolbar" class="bg-bgPanel border-b border-borderMain px-4 py-2 flex items-center gap-2 flex-wrap z-10 shrink-0 shadow-md transition-all">
-                <span class="ql-formats toolbar-group">
-                    <select class="ql-font" title="Stile Font">
-                        <option selected>Standard</option><option value="serif">Elegante (Serif)</option><option value="monospace">Codice (Mono)</option>
-                    </select>
-                    <select class="ql-size" title="Dimensione Testo"></select>
-                </span>
-                <span class="ql-formats toolbar-group">
-                    <button class="ql-bold"></button><button class="ql-italic"></button><button class="ql-underline"></button><button class="ql-strike"></button>
-                </span>
-                <span class="ql-formats toolbar-group">
-                    <select class="ql-color" title="Colore Testo"></select><select class="ql-background" title="Evidenziatore"></select>
-                </span>
-                <span class="ql-formats toolbar-group">
-                    <button class="ql-header" value="1"></button><button class="ql-header" value="2"></button>
-                    <button class="ql-blockquote"></button><button class="ql-code-block"></button>
-                </span>
-                <span class="ql-formats toolbar-group">
-                    <button class="ql-list" value="ordered"></button><button class="ql-list" value="bullet"></button>
-                    <select class="ql-align" title="Allineamento"></select>
-                </span>
-                <span class="ql-formats toolbar-group" style="margin-right: auto;">
-                    <button class="ql-link"></button>
-                    <button id="btn-custom-media" title="Importa JPG, PNG o PDF" class="text-accent hover:text-blue-400">
-                        <i class="ph-bold ph-image text-[16px]"></i>
+                <div class="flex items-center gap-3 border-l border-[#30363d] pl-4 ml-2">
+                    <button id="btn-custom-media" class="text-[#8b949e] hover:text-white transition-colors" title="Importa Immagine o PDF">
+                        <i class="ph-bold ph-image text-xl text-blue-400 hover:text-blue-300"></i>
                     </button>
-                    <button class="ql-clean" title="Rimuovi Formattazione"></button>
-                </span>
-
-                <div class="flex items-center relative group z-50">
-                    <button class="bg-[#21262d] hover:bg-gray-700 border border-borderMain text-textMain py-1.5 px-3 rounded-md text-xs font-semibold flex items-center gap-2 transition-all">
-                        <i class="ph-bold ph-export"></i> Esporta <i class="ph-bold ph-caret-down text-[10px]"></i>
-                    </button>
-                    <div class="absolute right-0 top-full mt-1 w-48 bg-bgPanel border border-borderMain rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-1">
-                        <button id="exp-docx" class="dropdown-item"><i class="ph-bold ph-file-doc text-blue-400 text-base"></i> Word (.docx)</button>
-                        <button id="exp-pdf" class="dropdown-item"><i class="ph-bold ph-file-pdf text-red-400 text-base"></i> PDF (.pdf)</button>
-                        <button id="exp-md" class="dropdown-item"><i class="ph-bold ph-markdown-logo text-gray-300 text-base"></i> Markdown (.md)</button>
-                        <button id="exp-html" class="dropdown-item"><i class="ph-bold ph-file-html text-orange-400 text-base"></i> HTML (.html)</button>
-                        <button id="exp-txt" class="dropdown-item"><i class="ph-bold ph-file-text text-gray-400 text-base"></i> Testo (.txt)</button>
+                    
+                    <div class="relative group">
+                        <button class="bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-white py-1.5 px-3 rounded text-sm font-semibold flex items-center gap-2 transition-all">
+                            <i class="ph-bold ph-export"></i> Esporta <i class="ph-bold ph-caret-down text-[10px]"></i>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 w-48 bg-[#161b22] border border-[#30363d] rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-1 z-50">
+                            <button id="exp-docx" class="dropdown-item"><i class="ph-bold ph-file-doc text-blue-400 text-base"></i> Word (.docx)</button>
+                            <button id="exp-pdf" class="dropdown-item"><i class="ph-bold ph-file-pdf text-red-400 text-base"></i> PDF (.pdf)</button>
+                            <button id="exp-md" class="dropdown-item"><i class="ph-bold ph-markdown-logo text-gray-300 text-base"></i> Markdown (.md)</button>
+                            <button id="exp-html" class="dropdown-item"><i class="ph-bold ph-file-html text-orange-400 text-base"></i> HTML (.html)</button>
+                            <button id="exp-txt" class="dropdown-item"><i class="ph-bold ph-file-text text-gray-400 text-base"></i> Testo (.txt)</button>
+                        </div>
                     </div>
                 </div>
+            </div>
+
+            <div id="unsupported-msg" class="absolute inset-0 flex flex-col items-center justify-center text-textMuted z-0 hidden bg-[#090b0f]">
+                <i class="ph-duotone ph-file-x text-6xl mb-4 text-red-500/50"></i>
+                <p class="text-lg text-white font-medium">Formato non supportato</p>
+                <p class="text-sm mt-2">I file binari pesanti non possono essere aperti direttamente.</p>
             </div>
 
             <div class="flex-1 overflow-y-auto custom-scrollbar bg-[#090b0f] flex justify-center py-10 relative">
                 <div id="no-file-open" class="absolute inset-0 flex flex-col items-center justify-center text-textMuted opacity-50 z-0">
                     <i class="ph-thin ph-terminal-window text-6xl mb-4"></i>
-                    <p>Seleziona un file dall'albero per iniziare.</p>
+                    <p>Seleziona o crea un file dall'esploratore.</p>
                 </div>
                 <div id="editor-wrapper" class="w-full max-w-[850px] min-h-[1056px] bg-bgPanel border border-borderMain shadow-2xl flex flex-col mb-10 mx-6 opacity-0 pointer-events-none transition-opacity duration-300 relative z-10 rounded-sm">
                     <div id="editor-container" class="flex-1"></div>
                 </div>
             </div>
 
-            <footer class="h-7 bg-[#0d1117] border-t border-borderMain flex items-center justify-between px-4 text-[10px] font-mono text-textMuted shrink-0">
-                <div class="flex gap-4">
-                    <span id="stat-words">0 Parole</span>
-                    <span id="stat-chars">0 Caratteri</span>
-                </div>
+            <footer class="h-6 bg-[#0d1117] border-t border-borderMain flex items-center justify-between px-4 text-[10px] font-mono text-textMuted shrink-0">
+                <div class="flex gap-4"><span id="stat-words">0 Parole</span><span id="stat-chars">0 Caratteri</span></div>
                 <div class="flex items-center gap-4">
-                    <span id="save-status" class="bg-gray-800 px-2 py-0.5 rounded text-gray-300">Pronto</span>
-                    <span class="text-green-500 flex items-center gap-1"><i class="ph-fill ph-check-circle"></i> Local FS</span>
+                    <span id="save-status" class="bg-gray-800 px-2 py-[1px] rounded text-gray-300">Pronto</span>
+                    <span class="text-green-500 flex items-center gap-1"><i class="ph-fill ph-check-circle"></i> Local FS Access</span>
                 </div>
             </footer>
         </main>
     </div>
 
     <input type="file" id="media-input" accept=".jpg,.jpeg,.png,.pdf" class="hidden">
-
     <script type="module" src="app.js"></script>
 </body>
 </html>

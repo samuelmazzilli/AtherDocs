@@ -1,15 +1,15 @@
-/* Scrollbars Stile VS Code */
+/* Scrollbars */
 .custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border: 3px solid transparent; background-clip: padding-box; border-radius: 10px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #484f58; }
 .custom-scrollbar-hidden::-webkit-scrollbar { display: none; }
 
-/* REGISTRAZIONE FONT AGGIUNTIVI */
+/* Font Aggiuntivi */
 .ql-font-serif { font-family: 'Merriweather', serif; }
 .ql-font-monospace { font-family: 'JetBrains Mono', monospace; }
 
-/* STILE TABS (LINGUETTE IN ALTO) */
+/* TABS */
 .editor-tab {
     display: flex; align-items: center; gap: 8px; height: 100%; padding: 0 12px; min-width: 130px; max-width: 220px;
     background: transparent; color: #8b949e; font-size: 12px; border: 1px solid transparent; border-bottom: none;
@@ -22,47 +22,55 @@
 .tab-close:hover { background: rgba(255,100,100,0.2); color: #ff6b6b; }
 .editor-tab.dirty .tab-title::after { content: ' •'; color: #e3b341; font-size: 18px; line-height: 0; position: relative; top: 4px; }
 
-/* OVERRIDE TOTALE TOOLBAR QUILL (Ribbon Style) */
-.ql-toolbar.ql-snow { display: none !important; } /* Nascondiamo la barra originale di Quill */
-.toolbar-group {
-    display: flex; align-items: center; background: #0d1117;
-    border: 1px solid #30363d; border-radius: 6px; padding: 2px; margin: 0 !important; gap: 2px;
+/* =========================================
+   IL FIX DEFINITIVO DELLA TOOLBAR 
+   ========================================= */
+.ql-toolbar.ql-snow {
+    border: none !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-wrap: wrap;
+    background: transparent !important;
+    font-family: 'Inter', sans-serif !important;
 }
-.ql-snow .ql-picker { color: #c9d1d9 !important; font-weight: 500; height: 26px !important; display: flex !important; align-items: center; }
-.ql-snow .ql-picker-label { border: none !important; transition: 0.2s; padding-left: 8px !important; outline: none; }
-.ql-snow .ql-picker-label:hover { background: rgba(255,255,255,0.05) !important; border-radius: 4px; }
-.ql-snow .ql-picker-options { background: #161b22 !important; border: 1px solid #30363d !important; border-radius: 6px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); padding: 4px 0 !important; }
-.ql-snow .ql-picker-item { padding: 4px 12px !important; color: #c9d1d9 !important; }
-.ql-snow .ql-picker-item:hover { color: #fff !important; background: #2f81f7 !important; }
-.ql-snow button { height: 26px !important; width: 26px !important; border-radius: 4px; transition: 0.2s; display: flex; align-items: center; justify-content: center; padding: 3px !important; }
-.ql-snow button:hover, .ql-snow button.ql-active { background: rgba(255,255,255,0.1) !important; }
+
+.ql-formats { margin-right: 6px !important; margin-bottom: 2px; display: flex; align-items: center; background: #010409; border: 1px solid #30363d; border-radius: 6px; padding: 2px; }
+.ql-snow .ql-picker { color: #8b949e !important; height: 26px !important; display: flex !important; align-items: center;}
+.ql-snow .ql-picker-label { border: none !important; padding-left: 6px !important; outline: none; }
+.ql-snow .ql-picker-label:hover { color: #c9d1d9 !important; background: rgba(255,255,255,0.05); border-radius: 4px;}
+.ql-snow .ql-picker-options { background: #161b22 !important; border: 1px solid #30363d !important; border-radius: 6px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); z-index: 50 !important;}
+.ql-snow .ql-picker-item { color: #8b949e !important; }
+.ql-snow .ql-picker-item:hover, .ql-snow .ql-picker-item.ql-selected { color: #fff !important; background: #2f81f7 !important; }
+
+.ql-snow button { height: 26px !important; width: 26px !important; border-radius: 4px; transition: 0.2s; padding: 4px !important; display: flex; align-items: center; justify-content: center; }
+.ql-snow button:hover, .ql-snow button.ql-active { background: rgba(255,255,255,0.05) !important; }
 .ql-snow .ql-stroke { stroke: #8b949e !important; stroke-width: 1.5 !important; }
 .ql-snow .ql-fill { fill: #8b949e !important; }
 .ql-snow button:hover .ql-stroke, .ql-snow button.ql-active .ql-stroke { stroke: #c9d1d9 !important; }
 .ql-snow button.ql-active .ql-stroke { stroke: #2f81f7 !important; }
+.ql-snow .ql-picker-label:hover .ql-stroke { stroke: #c9d1d9 !important; }
 
-/* EDITOR - IL FOGLIO A4 */
+/* EDITOR AREA */
 .ql-container.ql-snow { border: none !important; font-family: 'Inter', sans-serif !important; font-size: 1.05rem !important; }
 .ql-editor { padding: 60px 80px !important; line-height: 1.7; color: #c9d1d9; }
 .ql-editor h1, .ql-editor h2 { color: #ffffff; font-weight: 600; margin-top: 1.5em; margin-bottom: 0.5em; }
-.ql-editor h1 { border-bottom: 1px solid #30363d; padding-bottom: 5px; font-size: 2em; }
 .ql-editor blockquote { border-left: 4px solid #2f81f7; background: rgba(47, 129, 247, 0.05); color: #8b949e; padding: 10px 15px; border-radius: 0 6px 6px 0; font-style: italic; }
-.ql-editor pre.ql-syntax { background: #010409; border: 1px solid #30363d; border-radius: 6px; padding: 15px; }
+.ql-editor pre.ql-syntax { background: #010409; border: 1px solid #30363d; border-radius: 6px; padding: 15px; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; overflow-x: auto; }
 .ql-editor.ql-blank::before { color: #5a6370; left: 80px !important; font-style: normal; }
 .ql-editor img { max-width: 100%; border-radius: 8px; border: 1px solid #30363d; margin: 15px 0; }
 
-/* UTILITIES */
+/* TREE UI */
 .tree-item { cursor: pointer; user-select: none; transition: background 0.1s; border-radius: 4px; margin-bottom: 2px; }
 .tree-item:hover { background: rgba(255,255,255,0.05); }
-.file-active { background: rgba(47, 129, 247, 0.15) !important; color: #2f81f7 !important; font-weight: 500; border-left: 2px solid #2f81f7; }
-.dropdown-item { width: 100%; text-align: left; padding: 8px 16px; font-size: 13px; color: #c9d1d9; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+.file-active { background: rgba(47, 129, 247, 0.15) !important; border-left: 2px solid #2f81f7; }
+.file-active .truncate { color: #2f81f7; font-weight: 600; }
+.dropdown-item { border: none; background: transparent; cursor: pointer; transition: 0.1s; width: 100%; text-align: left; padding: 8px 16px; font-size: 13px; color: #c9d1d9; display: flex; align-items: center; gap: 8px; }
 .dropdown-item:hover { background: #2f81f7; color: white; }
 
-/* BADGE PDF ALLEGATO */
+/* BADGE PDF */
 .pdf-attachment {
     display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; margin: 10px 0;
-    background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #2f81f7;
-    text-decoration: none !important; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
-    transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    background: #010409; border: 1px solid #30363d; border-radius: 8px; color: #2f81f7;
+    text-decoration: none !important; font-weight: 500; font-size: 13px; font-family: 'Inter', sans-serif;
 }
-.pdf-attachment:hover { border-color: #2f81f7; background: #161b22; transform: translateY(-1px); }
+.pdf-attachment:hover { border-color: #2f81f7; background: #0d1117; }
