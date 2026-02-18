@@ -1,0 +1,17 @@
+/* Customizzazione estrema di Quill per integrarlo nel tema */
+#editor-container { width: 100%; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; flex: 1; }
+.ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid var(--border) !important; background: var(--bg-app); position: sticky; top: 0; z-index: 5; padding: 12px !important; display: flex; justify-content: center; }
+.ql-container.ql-snow { border: none !important; font-family: var(--font-editor); font-size: 1.15rem; flex: 1; }
+.ql-editor { padding: 50px; line-height: 1.8; color: var(--text-main); min-height: calc(100vh - 140px); }
+.ql-editor.ql-blank::before { color: var(--text-muted); font-style: italic; }
+.ql-stroke { stroke: var(--text-main) !important; }
+.ql-fill { fill: var(--text-main) !important; }
+.ql-picker { color: var(--text-main) !important; }
+
+/* Inedito: Modalità ZEN per immersione totale */
+body.zen-mode .sidebar { margin-left: -280px; }
+body.zen-mode .topbar { transform: translateY(-100%); position: absolute; width: 100%; opacity: 0; transition: all 0.3s; }
+body.zen-mode .topbar:hover { transform: translateY(0); opacity: 1; }
+body.zen-mode .statusbar, body.zen-mode .ql-toolbar { opacity: 0; pointer-events: none; transition: 0.3s; }
+body.zen-mode .editor-wrapper { background: var(--bg-app); }
+body.zen-mode .ql-editor { font-size: 1.35rem; max-width: 750px; }

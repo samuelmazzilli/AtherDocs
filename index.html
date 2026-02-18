@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AetherDocs | Next-Gen Workspace</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/editor.css">
+</head>
+<body>
+    <div id="app">
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="ph-fill ph-planet"></i> AetherDocs</h2>
+                <button id="btn-close-sidebar" class="icon-btn" title="Chiudi"><i class="ph ph-caret-left"></i></button>
+            </div>
+            <div class="sidebar-actions">
+                <button id="btn-open-folder" class="btn primary"><i class="ph ph-folder-open"></i> Apri Workspace (PC)</button>
+                <button id="btn-new-file" class="btn secondary"><i class="ph ph-file-plus"></i> Nuovo File</button>
+            </div>
+            <div class="file-tree-header">RISORSE LOCALI</div>
+            <div id="file-tree" class="file-tree">
+                <div class="empty-state">Nessuna cartella locale aperta.<br>I tuoi dati restano offline.</div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button id="btn-open-sidebar" class="icon-btn hidden"><i class="ph ph-list"></i></button>
+                    <div class="file-info">
+                        <i class="ph ph-file-text"></i>
+                        <span id="current-file">Senza_Titolo.html</span>
+                        <span id="save-status" class="status-badge">Sincronizzato</span>
+                    </div>
+                </div>
+                
+                <div class="topbar-right">
+                    <button id="btn-lofi" class="tool-btn" title="Rumore Bianco Focus"><i class="ph ph-headphones"></i> Focus</button>
+                    <button id="btn-typewriter" class="tool-btn" title="Suono Tastiera Meccanica"><i class="ph ph-keyboard"></i> ASMR</button>
+                    <button id="btn-zen" class="tool-btn" title="Modalità Immersiva"><i class="ph ph-corners-out"></i> Zen</button>
+                    
+                    <select id="theme-selector" class="select-css">
+                        <option value="dark">🌙 Dark Mode</option>
+                        <option value="light">☀️ Light Mode</option>
+                        <option value="cyberpunk">🚀 Cyberpunk</option>
+                        <option value="writer">🖋️ Classic Writer</option>
+                    </select>
+
+                    <div class="dropdown">
+                        <button class="btn primary"><i class="ph ph-export"></i> Esporta <i class="ph ph-caret-down"></i></button>
+                        <div class="dropdown-menu">
+                            <a href="#" id="exp-pdf"><i class="ph ph-file-pdf"></i> Esporta in PDF</a>
+                            <a href="#" id="exp-html"><i class="ph ph-file-html"></i> Esporta in HTML</a>
+                            <a href="#" id="exp-md"><i class="ph ph-markdown-logo"></i> Esporta in Markdown</a>
+                            <a href="#" id="exp-txt"><i class="ph ph-file-text"></i> Esporta in Testo</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="editor-wrapper">
+                <div id="editor-container"></div>
+            </div>
+
+            <footer class="statusbar">
+                <div class="status-left">
+                    <span id="word-count">0 Parole</span> <span class="divider"></span>
+                    <span id="char-count">0 Caratteri</span> <span class="divider"></span>
+                    <span id="read-time">0 min lettura</span>
+                </div>
+                <div class="status-right">
+                    <span><i class="ph ph-lock-key"></i> Native FileSystem API</span> <span class="divider"></span>
+                    <span>UTF-8</span>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
