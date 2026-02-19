@@ -64,8 +64,6 @@ body.ai-open #ai-sidebar { transform: translateX(0); }
 
 /* FIX IMMAGINI */
 .ql-editor img { max-width: 100%; border-radius: 8px; border: 1px solid #30363d; margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: block; }
-
-/* PDF BADGE NATIVO */
 .pdf-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; margin: 10px 0; background: #1e1a2e; border: 1px solid #a855f7; border-radius: 6px; color: #d8b4fe; text-decoration: none !important; font-weight: bold; font-family: 'Inter', sans-serif; transition: 0.2s;}
 .pdf-badge:hover { background: #2d2442; color: #fff;}
 

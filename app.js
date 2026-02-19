@@ -1,14 +1,15 @@
 // --- CHIAVE API GOOGLE GEMINI ---
 const GEMINI_API_KEY = "AIzaSyB1CfsF2ZkZq7qfe-mCjfPx18A5V5gbItw";
 
+// Inizializzazione Editor
 const Font = Quill.import('formats/font'); Font.whitelist = ['sans-serif', 'serif', 'monospace']; Quill.register(Font, true);
 const editor = new Quill('#editor-container', { 
-    theme: 'snow', placeholder: 'Inizia a scrivere o incollare codice...',
+    theme: 'snow', placeholder: 'Inizia a scrivere il tuo documento o incolla codice...',
     modules: { toolbar: '#custom-toolbar', history: { delay: 1000, maxStack: 500, userOnly: true } }
 });
 
 // --- STATO GLOBALE ---
-let currentMode = 'cloud';
+let currentMode = null;
 let rootDirHandle = null;
 let cloudToken = localStorage.getItem('aether_cloud_token') || null;
 let cloudData = {}; 
@@ -17,21 +18,98 @@ let activeTabId = null;
 let saveTimeout = null;
 let isSwitching = false;
 let isGhostEditing = false;
-let activeAiModel = "models/gemini-1.5-flash"; // Fallback iniziale
+let activeAiModel = "gemini-1.5-flash"; // Fallback ultra-stabile
 
 const DOM = {
-    workspace: document.getElementById('app-workspace'), splash: document.getElementById('boot-screen'),
-    tree: document.getElementById('file-tree'), tabs: document.getElementById('tabs-container'),
-    editorWrap: document.getElementById('editor-wrapper'), status: document.getElementById('save-status'),
-    aiChatBox: document.getElementById('ai-chat-box'), ghostWidget: document.getElementById('ghost-edit-widget'),
-    displayToken: document.getElementById('display-token'), cloudModal: document.getElementById('cloud-modal')
+    welcome: document.getElementById('welcome-screen'),
+    welcomeMain: document.getElementById('welcome-main'),
+    cloudModal: document.getElementById('cloud-modal'),
+    workspace: document.getElementById('app-workspace'),
+    tree: document.getElementById('file-tree'), 
+    tabs: document.getElementById('tabs-container'),
+    editorWrap: document.getElementById('editor-wrapper'), 
+    status: document.getElementById('save-status'),
+    aiChatBox: document.getElementById('ai-chat-box'), 
+    ghostWidget: document.getElementById('ghost-edit-widget'),
+    displayToken: document.getElementById('display-token')
 };
 
 // ==========================================
-// 1. DIZIONARIO ICONE ESTESO (40+ Formati)
+// 1. GESTIONE DEI BOTTONI SCHERMATA INIZIALE
+// ==========================================
+document.getElementById('btn-welcome-local').onclick = async () => {
+    try {
+        rootDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        enterWorkspace('local');
+    } catch(e) { console.warn("Permesso cartella negato o annullato."); }
+};
+
+document.getElementById('btn-welcome-cloud').onclick = async (e) => {
+    const btn = e.currentTarget;
+    const origHTML = btn.innerHTML;
+    
+    // Se l'utente ha già un cloudToken nel browser, entra istantaneamente
+    if (cloudToken) {
+        enterWorkspace('cloud');
+        return;
+    }
+
+    // Se non ce l'ha, lo crea in background all'istante
+    btn.innerHTML = '<i class="ph-duotone ph-spinner animate-spin text-xl"></i> Creazione Cloud...';
+    btn.style.pointerEvents = 'none';
+    
+    try {
+        const res = await fetch('https://api.npoint.io', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({files: {"Guida_Veloce.md": "<h1>AetherDocs Cloud</h1><p>Il tuo spazio online invisibile è pronto e sincronizzato.</p>"}}) 
+        });
+        const data = await res.json();
+        cloudToken = data.id; 
+        localStorage.setItem('aether_cloud_token', cloudToken);
+        enterWorkspace('cloud');
+    } catch(err) { 
+        alert("Errore di rete. Impossibile creare il cloud serverless."); 
+        btn.innerHTML = origHTML; 
+        btn.style.pointerEvents = 'auto'; 
+    }
+};
+
+document.getElementById('btn-welcome-import').onclick = () => {
+    DOM.welcomeMain.classList.add('hidden');
+    DOM.cloudModal.classList.remove('hidden');
+    DOM.cloudModal.classList.add('flex');
+};
+
+document.getElementById('btn-cloud-cancel').onclick = () => {
+    DOM.cloudModal.classList.add('hidden');
+    DOM.cloudModal.classList.remove('flex');
+    DOM.welcomeMain.classList.remove('hidden');
+};
+
+document.getElementById('btn-cloud-connect').onclick = () => {
+    const val = document.getElementById('cloud-token-input').value.trim();
+    if(!val) return;
+    cloudToken = val; 
+    localStorage.setItem('aether_cloud_token', cloudToken);
+    enterWorkspace('cloud');
+};
+
+function enterWorkspace(mode) {
+    currentMode = mode;
+    DOM.welcome.style.opacity = '0';
+    setTimeout(() => {
+        DOM.welcome.classList.add('hidden');
+        DOM.workspace.classList.remove('opacity-0', 'pointer-events-none');
+        switchSidebarTab(mode);
+    }, 500);
+}
+
+// ==========================================
+// 2. DIZIONARIO ICONE ESTESO (40+ Tipi)
 // ==========================================
 const getIcon = (ext) => {
-    ext = ext.toLowerCase();
+    ext = ext?.toLowerCase() || 'txt';
     if(['png','jpg','jpeg','gif','svg','webp'].includes(ext)) return 'ph-image text-purple-400';
     if(['pdf'].includes(ext)) return 'ph-file-pdf text-red-500';
     if(['html','htm'].includes(ext)) return 'ph-file-html text-orange-400';
@@ -42,7 +120,6 @@ const getIcon = (ext) => {
     if(['md','mdx'].includes(ext)) return 'ph-markdown-logo text-blue-300';
     if(['doc','docx'].includes(ext)) return 'ph-file-doc text-blue-500';
     if(['xls','xlsx','csv'].includes(ext)) return 'ph-file-xls text-green-500';
-    if(['ppt','pptx'].includes(ext)) return 'ph-file-ppt text-orange-500';
     if(['zip','rar','7z','tar','gz'].includes(ext)) return 'ph-file-archive text-orange-400';
     if(['mp3','wav','ogg'].includes(ext)) return 'ph-file-audio text-yellow-500';
     if(['mp4','mov','avi','mkv'].includes(ext)) return 'ph-file-video text-pink-400';
@@ -50,62 +127,30 @@ const getIcon = (ext) => {
 };
 
 // ==========================================
-// 2. BOOT ISTANTANEO CLOUD E AI DISCOVERY
+// 3. AUTO-DETECT MODELLO AI (Infallibile)
 // ==========================================
 async function autoDetectAI() {
     try {
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
         const data = await res.json();
-        
         if (data.models) {
-            const valid = data.models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent") && m.name.includes("gemini"));
+            const valid = data.models.filter(m => m.supportedGenerationMethods?.includes("generateContent") && m.name.includes("gemini"));
             const best = valid.find(m => m.name.includes("1.5-flash")) || valid.find(m => m.name.includes("pro")) || valid[0];
-            if (best) activeAiModel = best.name;
+            // Rimuove la dicitura "models/" che faceva impazzire l'API
+            if (best) activeAiModel = best.name.replace('models/', '');
         }
-        document.getElementById('ai-model-status').innerHTML = `<span class="text-green-400 font-bold">AI Pronta (${activeAiModel.split('/')[1] || activeAiModel})</span>`;
-        document.getElementById('ai-welcome-msg').innerHTML = `<i class="ph-fill ph-robot text-purple-400 text-lg mb-1 block"></i> IA auto-rilevata: <b>${activeAiModel.split('/')[1] || activeAiModel}</b>. Sono pronto ad assisterti.`;
-    } catch(e) {
-        document.getElementById('ai-model-status').innerHTML = `<span class="text-yellow-500 font-bold">AI Pronta (Fallback)</span>`;
-    }
+        document.getElementById('ai-model-status').innerHTML = `<span class="text-green-400 font-bold">AI Pronta (${activeAiModel})</span>`;
+        document.getElementById('ai-welcome-msg').innerHTML = `<i class="ph-fill ph-robot text-purple-400 text-lg mb-1 block"></i> IA Google rilevata: <b>${activeAiModel}</b>.<br>Sono pronto ad assisterti.`;
+    } catch(e) { document.getElementById('ai-model-status').innerHTML = `<span class="text-yellow-500 font-bold">AI Fallback (1.5-flash)</span>`; }
 }
-
-async function bootAetherOS() {
-    autoDetectAI(); // Ricerca in background dell'IA senza bloccare l'app
-    
-    try {
-        if (!cloudToken) {
-            document.getElementById('boot-text').innerText = "Creazione serverless Vault in corso...";
-            const res = await fetch('https://api.npoint.io', { method: 'POST', body: JSON.stringify({files: {"Benvenuto.md": "<h1>AetherDocs Cloud</h1><p>I tuoi file sono ora al sicuro e sincronizzati nel cloud.</p>"}}) });
-            const data = await res.json();
-            cloudToken = data.id; 
-            localStorage.setItem('aether_cloud_token', cloudToken);
-        }
-        DOM.displayToken.value = cloudToken;
-        await loadCloudFiles();
-        
-        // Dissolvenza Splash Screen Istantanea
-        DOM.splash.style.opacity = '0';
-        setTimeout(() => {
-            DOM.splash.classList.add('hidden');
-            DOM.workspace.classList.remove('opacity-0');
-            DOM.workspace.classList.add('opacity-100');
-        }, 500);
-        
-    } catch(e) { 
-        document.getElementById('boot-text').innerText = "Errore di rete. Impossibile connettersi al Cloud.";
-        document.getElementById('boot-text').classList.add('text-red-400');
-    }
-}
-
-document.addEventListener('DOMContentLoaded', bootAetherOS);
+autoDetectAI(); // Parte in background per non bloccare l'utente
 
 // ==========================================
-// 3. FIX IMMAGINI E PDF NATIVI (HACK QUILL)
+// 4. FIX IMMAGINI E PDF: Hack Nativo di Quill
 // ==========================================
-// Modifichiamo il comportamento dell'icona immagine standard
 const quillToolbar = editor.getModule('toolbar');
 quillToolbar.addHandler('image', () => {
-    // 1. Salva la posizione ESATTA del cursore prima di aprire la finestra
+    // Salva le coordinate perfette del cursore nell'editor
     editor.focus();
     const range = editor.getSelection();
     const cursorIndex = range ? range.index : editor.getLength();
@@ -116,13 +161,11 @@ quillToolbar.addHandler('image', () => {
     input.click();
 
     input.onchange = () => {
-        const file = input.files[0];
-        if (!file) return;
-        
+        const file = input.files[0]; if (!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
             if (file.type === 'application/pdf') {
-                const badge = `<br><a href="${e.target.result}" download="${file.name}" class="pdf-badge" contenteditable="false"><i class="ph-bold ph-file-pdf"></i> PDF: ${file.name}</a><br>`;
+                const badge = `<br><a href="${e.target.result}" download="${file.name}" class="pdf-badge" contenteditable="false"><i class="ph-bold ph-file-pdf text-xl"></i> SCARICA PDF: ${file.name}</a><br><br>`;
                 editor.clipboard.dangerouslyPasteHTML(cursorIndex, badge);
                 editor.setSelection(cursorIndex + 2);
             } else {
@@ -135,21 +178,12 @@ quillToolbar.addHandler('image', () => {
 });
 
 // ==========================================
-// 4. GESTIONE CLOUD E SIDEBAR
+// 5. GESTIONE CLOUD E SIDEBAR
 // ==========================================
-document.getElementById('btn-import-token').onclick = () => { DOM.cloudModal.classList.remove('hidden'); DOM.cloudModal.classList.add('flex'); };
-document.getElementById('btn-cloud-cancel').onclick = () => { DOM.cloudModal.classList.add('hidden'); DOM.cloudModal.classList.remove('flex'); };
-document.getElementById('btn-cloud-connect').onclick = async () => {
-    const val = document.getElementById('cloud-token-input').value.trim(); if(!val) return;
-    cloudToken = val; localStorage.setItem('aether_cloud_token', cloudToken);
-    DOM.cloudModal.classList.add('hidden'); DOM.cloudModal.classList.remove('flex');
-    DOM.displayToken.value = cloudToken;
-    openTabs = []; renderTabs(); await loadCloudFiles();
-};
-document.getElementById('btn-copy-token').onclick = () => { navigator.clipboard.writeText(cloudToken); updateStatus("Token Copiato", "text-purple-400"); };
+document.getElementById('btn-copy-token').onclick = () => { navigator.clipboard.writeText(cloudToken); updateStatus("Token Copiato!", "text-purple-400"); };
 
 async function loadCloudFiles() {
-    DOM.tree.innerHTML = '<div class="text-xs text-center text-gray-500 mt-6 animate-pulse">Syncing...</div>';
+    DOM.tree.innerHTML = '<div class="text-xs text-center text-gray-500 mt-6 animate-pulse">Sincronizzazione in corso...</div>';
     try {
         const res = await fetch(`https://api.npoint.io/${cloudToken}`);
         if (!res.ok) throw new Error();
@@ -181,20 +215,27 @@ document.getElementById('tab-local').onclick = async () => { if(!rootDirHandle){
 document.getElementById('tab-cloud').onclick = () => { switchSidebarTab('cloud'); };
 
 function switchSidebarTab(mode) {
-    currentMode = mode; const tLoc = document.getElementById('tab-local'); const tClo = document.getElementById('tab-cloud');
+    currentMode = mode; 
+    const tLoc = document.getElementById('tab-local'); 
+    const tClo = document.getElementById('tab-cloud');
+    
     if(mode === 'local') {
-        tLoc.className = "flex-1 py-3 text-white border-b-2 border-blue-500 flex justify-center gap-2 items-center bg-[#161b22]";
-        tClo.className = "flex-1 py-3 text-gray-500 border-b-2 border-transparent hover:text-purple-400 flex justify-center gap-2 items-center bg-[#010409]";
+        tLoc.className = "flex-1 py-3 text-white border-b-2 border-blue-500 flex justify-center gap-2 items-center bg-[#161b22] transition-all";
+        tClo.className = "flex-1 py-3 text-gray-500 border-b-2 border-transparent hover:text-purple-400 flex justify-center gap-2 items-center bg-[#010409] transition-all";
         document.getElementById('workspace-title').innerText = "DISCO LOCALE";
         document.getElementById('workspace-title').className = "text-xs font-mono text-blue-400 tracking-widest font-bold";
         document.getElementById('cloud-info').classList.add('hidden');
+        document.getElementById('cloud-info').classList.remove('flex');
         if(rootDirHandle) buildLocalTree(rootDirHandle, DOM.tree, 0);
+        else DOM.tree.innerHTML = '<div class="text-xs text-center text-gray-500 mt-4 italic">Nessuna cartella aperta.</div>';
     } else {
-        tClo.className = "flex-1 py-3 text-white border-b-2 border-purple-500 flex justify-center gap-2 items-center bg-[#161b22]";
-        tLoc.className = "flex-1 py-3 text-gray-500 border-b-2 border-transparent hover:text-blue-400 flex justify-center gap-2 items-center bg-[#010409]";
+        tClo.className = "flex-1 py-3 text-white border-b-2 border-purple-500 flex justify-center gap-2 items-center bg-[#161b22] transition-all";
+        tLoc.className = "flex-1 py-3 text-gray-500 border-b-2 border-transparent hover:text-blue-400 flex justify-center gap-2 items-center bg-[#010409] transition-all";
         document.getElementById('workspace-title').innerText = "AETHER CLOUD";
         document.getElementById('workspace-title').className = "text-xs font-mono text-purple-400 tracking-widest font-bold";
         document.getElementById('cloud-info').classList.remove('hidden');
+        document.getElementById('cloud-info').classList.add('flex');
+        DOM.displayToken.value = cloudToken;
         loadCloudFiles();
     }
 }
@@ -229,7 +270,7 @@ async function buildLocalTree(dirHandle, container, level) {
 }
 
 // ==========================================
-// 5. TABS E AUTO-SAVE
+// 6. GESTIONE TABS MULTIPLE E AUTO-SAVE
 // ==========================================
 function openTab(id, ext, content, source, handle=null) {
     if(isGhostEditing) return alert("Concludi prima la revisione dell'IA!");
@@ -289,7 +330,7 @@ document.getElementById('btn-new-file').onclick = async () => {
 };
 
 // ==========================================
-// 6. GHOST EDIT AI & CHAT INTELLIGENTE
+// 7. GHOST EDIT AI & CHAT INTERATTIVA
 // ==========================================
 document.getElementById('btn-toggle-ai').onclick = () => document.body.classList.toggle('ai-open');
 document.getElementById('btn-close-ai').onclick = () => document.body.classList.remove('ai-open');
@@ -306,7 +347,7 @@ document.getElementById('ai-form').onsubmit = (e) => { e.preventDefault(); handl
 document.getElementById('ai-input').addEventListener('keypress', (e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('ai-form').dispatchEvent(new Event('submit')); } });
 
 async function handleAISubmit(promptText) {
-    if(!promptText || !activeTabId || isGhostEditing || !activeAiModel) return;
+    if(!promptText || !activeTabId || isGhostEditing) return;
 
     appendChatMsg(promptText, true); const loadingDiv = appendChatMsg("", false, true);
     
@@ -317,12 +358,12 @@ Codice HTML attuale del documento dell'utente:
 ${currentHtml}
 ---
 REGOLE FONDAMENTALI:
-1. Se l'utente chiede una MODIFICA, TRADUZIONE, ESPANSIONE o CORREZIONE del documento, DEVI restituire l'intero nuovo codice HTML aggiornato, racchiuso ESATTAMENTE tra i tag <AETHER_MOD> e </AETHER_MOD>. Non omettere questi tag per le modifiche.
+1. Se l'utente chiede una MODIFICA, TRADUZIONE o ESPANSIONE del documento, DEVI restituire l'intero nuovo codice HTML aggiornato, racchiuso ESATTAMENTE tra i tag <AETHER_MOD> e </AETHER_MOD>. Non omettere i tag per le modifiche.
 2. Mantieni la formattazione originale del testo (h1, p, br, b).
-3. Se l'utente fa una domanda discorsiva o non richiede modifiche dirette al file, rispondi normalmente testualmente senza usare i tag.`;
+3. Se l'utente fa una domanda discorsiva senza voler cambiare il file, rispondi normalmente in Markdown senza usare i tag speciali.`;
 
     try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/${activeAiModel}:generateContent?key=${GEMINI_API_KEY}`, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${activeAiModel}:generateContent?key=${GEMINI_API_KEY}`, {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ contents: [{ parts: [{ text: `${sysPrompt}\n\nRichiesta utente: ${promptText}` }] }] })
         });
@@ -343,14 +384,14 @@ REGOLE FONDAMENTALI:
         } else {
             appendChatMsg(reply, false);
         }
-    } catch(e) { loadingDiv.remove(); appendChatMsg(`❌ Errore API Google. Impossibile connettersi.`, false); }
+    } catch(e) { loadingDiv.remove(); appendChatMsg(`❌ Errore di Connessione al modello AI.`, false); }
 }
 
 document.getElementById('btn-ghost-reject').onclick = () => { editor.history.undo(); isGhostEditing = false; DOM.editorWrap.classList.remove('ghost-glow'); DOM.ghostWidget.classList.add('hidden'); DOM.ghostWidget.classList.remove('flex'); };
 document.getElementById('btn-ghost-accept').onclick = () => { isGhostEditing = false; DOM.editorWrap.classList.remove('ghost-glow'); DOM.ghostWidget.classList.add('hidden'); DOM.ghostWidget.classList.remove('flex'); editor.insertText(editor.getLength(), ' '); editor.deleteText(editor.getLength()-1, 1); };
 
 // ==========================================
-// 7. EXPORT
+// 8. EXPORT MULTI-FORMATO
 // ==========================================
 const getBaseName = () => { const t = openTabs.find(t=>t.id===activeTabId); return t ? t.id.replace(/\.[^/.]+$/, "") : "Documento"; };
 const dwnld = (c, e, m) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([c], {type: m})); a.download = `${getBaseName()}.${e}`; a.click(); };
