@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AetherDocs | Ultimate AI</title>
+    <title>AetherDocs | Ultimate Edition</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -25,9 +25,27 @@
             }, fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } }
         }
     </script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body class="bg-bgBase text-textMain h-screen w-screen overflow-hidden flex font-sans selection:bg-accent selection:text-white relative">
+
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[300] flex flex-col gap-3 pointer-events-none"></div>
+
+    <div id="ai-settings-modal" class="hidden fixed inset-0 z-[200] items-center justify-center bg-black/80 backdrop-blur-md transition-all">
+        <div class="w-[450px] bg-[#161b22] p-8 rounded-2xl border border-purple-500/50 shadow-[0_0_50px_rgba(168,85,247,0.2)]">
+            <h2 class="text-white font-bold text-xl mb-2 flex items-center gap-2"><i class="ph-fill ph-lock-key text-purple-400"></i> Sicurezza IA Google</h2>
+            <p class="text-sm text-gray-400 mb-6 leading-relaxed">Le chiavi pubblicate in chat vengono revocate da Google. Inserisci la tua chiave privata per sbloccare l'IA (Rimarrà solo nel tuo browser).</p>
+            <div class="bg-[#0d1117] p-4 rounded-lg border border-[#30363d] mb-6">
+                <p class="text-xs text-gray-400 mb-2">1. Clicca <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-400 hover:underline font-bold">QUI</a> per creare una chiave gratuita.</p>
+                <p class="text-xs text-gray-400">2. Copiala e incollala qui sotto:</p>
+            </div>
+            <input type="password" id="modal-api-key-input" placeholder="AIzaSy..." class="w-full bg-[#010409] text-white text-sm font-mono border border-[#30363d] rounded-lg p-3 mb-6 outline-none focus:border-purple-500">
+            <div class="flex gap-3">
+                <button id="btn-save-modal-key" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white py-2.5 rounded-lg font-semibold text-sm transition-all">Salva e Attiva IA</button>
+                <button id="btn-close-modal-key" class="px-4 border border-gray-600 text-gray-400 hover:text-white hover:bg-gray-800 py-2.5 rounded-lg font-semibold text-sm transition-all">Chiudi</button>
+            </div>
+        </div>
+    </div>
 
     <div id="welcome-screen" class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-bgBase transition-all duration-500">
         <div id="welcome-main" class="text-center flex flex-col items-center">
@@ -35,24 +53,24 @@
                 <i class="ph-fill ph-planet text-white text-5xl"></i>
             </div>
             <h1 class="text-4xl font-bold text-white mb-3 tracking-tight">AetherDocs <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">AI Cloud</span></h1>
-            <p class="text-textMuted mb-10 text-lg max-w-md">Workspace Locale + Nuovo Cloud RESTful + Gemini Copilot.</p>
+            <p class="text-textMuted mb-10 text-lg max-w-md">Nuovo Motore Cloud Infallibile + IA Auto-Curante.</p>
             
             <div class="flex gap-4">
                 <button id="btn-welcome-local" class="bg-[#161b22] border border-[#30363d] hover:border-blue-500 text-white px-6 py-4 rounded-xl font-semibold flex items-center gap-3 transition-all shadow-lg hover:scale-105">
                     <i class="ph-bold ph-hard-drives text-2xl text-blue-400"></i> Apri PC Locale
                 </button>
                 <button id="btn-welcome-cloud" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-4 rounded-xl font-semibold flex items-center gap-3 transition-all shadow-lg shadow-purple-500/20 hover:scale-105">
-                    <i class="ph-bold ph-cloud text-2xl"></i> Aether Cloud Gratuito
+                    <i class="ph-bold ph-cloud text-2xl"></i> Crea Cloud Gratuito
                 </button>
             </div>
             
-            <p id="btn-welcome-import" class="mt-8 text-xs text-gray-500 hover:text-purple-400 cursor-pointer font-medium transition-colors underline underline-offset-4">Hai già un Token Cloud? Importalo da qui.</p>
+            <p id="btn-welcome-import" class="mt-8 text-xs text-gray-500 hover:text-purple-400 cursor-pointer font-medium transition-colors underline underline-offset-4">Hai già un Token Cloud? Sincronizza da qui.</p>
         </div>
 
         <div id="cloud-modal" class="hidden flex-col items-center w-[400px] bg-[#161b22] p-8 rounded-2xl border border-[#30363d] shadow-2xl">
-            <h2 class="text-white font-bold text-xl mb-2 flex items-center gap-2"><i class="ph-fill ph-cloud text-purple-400"></i> Importa Dispositivo</h2>
-            <p class="text-xs text-gray-400 mb-6 text-center">Incolla un Token Cloud per accedere ai tuoi file da questo PC.</p>
-            <input type="text" id="cloud-token-input" placeholder="Incolla il Token (es: ff8081...)" class="w-full bg-[#010409] text-white text-sm font-mono border border-[#30363d] rounded-lg p-3 mb-6 outline-none focus:border-purple-500 text-center">
+            <h2 class="text-white font-bold text-xl mb-2 flex items-center gap-2"><i class="ph-fill ph-cloud text-purple-400"></i> Sincronizza Dispositivo</h2>
+            <p class="text-xs text-gray-400 mb-6 text-center">Incolla il Token Cloud per accedere ai tuoi file da questo PC.</p>
+            <input type="text" id="cloud-token-input" placeholder="Incolla il Token..." class="w-full bg-[#010409] text-white text-sm font-mono border border-[#30363d] rounded-lg p-3 mb-6 outline-none focus:border-purple-500 text-center">
             <div class="flex gap-3 w-full">
                 <button id="btn-cloud-connect" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white py-2.5 rounded-lg font-semibold text-sm transition-all">Sincronizza</button>
                 <button id="btn-cloud-cancel" class="flex-1 border border-gray-600 text-gray-400 hover:text-white hover:bg-gray-800 py-2.5 rounded-lg font-semibold text-sm transition-all">Annulla</button>
@@ -69,7 +87,10 @@
             </div>
             
             <div id="cloud-info" class="hidden flex-col p-3 border-b border-borderMain bg-[#0d1117] gap-2">
-                <span class="text-[10px] text-gray-500 font-mono uppercase tracking-wider">Il Tuo Cloud Token Segreto</span>
+                <div class="flex justify-between items-center">
+                    <span class="text-[10px] text-gray-500 font-mono uppercase tracking-wider">Cloud Token Segreto</span>
+                    <button id="btn-disconnect-cloud" class="text-[10px] text-red-400 hover:text-red-300 font-semibold transition-colors"><i class="ph-bold ph-sign-out"></i> Esci</button>
+                </div>
                 <div class="flex items-center gap-2">
                     <input type="text" id="display-token" class="flex-1 bg-black border border-gray-700 rounded px-2 py-1.5 text-xs text-purple-300 font-mono outline-none" readonly>
                     <button id="btn-copy-token" class="p-1.5 bg-gray-800 rounded hover:bg-gray-700 text-gray-300 transition-colors" title="Copia per altri dispositivi"><i class="ph-bold ph-copy"></i></button>
@@ -94,14 +115,13 @@
                     <span class="ql-formats"><select class="ql-color"></select><select class="ql-background"></select></span>
                     <span class="ql-formats"><button class="ql-header" value="1"></button><button class="ql-header" value="2"></button><button class="ql-blockquote"></button><button class="ql-code-block"></button></span>
                     <span class="ql-formats"><button class="ql-list" value="ordered"></button><button class="ql-list" value="bullet"></button></span>
-                    
                     <span class="ql-formats"><button class="ql-image" title="Inserisci Immagine o PDF"></button></span>
                 </div>
 
                 <div class="flex items-center gap-3 border-l border-[#30363d] pl-4 ml-2">
-                    <div class="relative group">
+                    <div class="relative group z-50">
                         <button class="text-gray-400 hover:text-green-400 transition-colors px-2 py-1 rounded hover:bg-gray-800 flex items-center gap-1 text-xs font-semibold"><i class="ph-bold ph-export text-lg"></i> Esporta <i class="ph-bold ph-caret-down"></i></button>
-                        <div class="absolute right-0 top-full mt-1 w-48 bg-[#161b22] border border-[#30363d] rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 py-1 shadow-2xl">
+                        <div class="absolute right-0 top-full mt-1 w-48 bg-[#161b22] border border-[#30363d] rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all py-1 shadow-2xl">
                             <button id="exp-docx" class="dropdown-item"><i class="ph-bold ph-file-doc text-blue-400"></i> Word (.docx)</button>
                             <button id="exp-pdf" class="dropdown-item"><i class="ph-bold ph-file-pdf text-red-400"></i> PDF (.pdf)</button>
                             <button id="exp-md" class="dropdown-item"><i class="ph-bold ph-markdown-logo text-gray-300"></i> Markdown (.md)</button>
@@ -144,16 +164,9 @@
                     <i class="ph-fill ph-sparkle text-purple-400 text-xl"></i> Aether Copilot
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="btn-ai-settings" class="text-textMuted hover:text-purple-400 transition-colors p-1.5 rounded hover:bg-gray-800" title="Impostazioni API"><i class="ph-bold ph-gear text-base"></i></button>
+                    <button id="btn-ai-settings" class="text-textMuted hover:text-purple-400 transition-colors p-1.5 rounded hover:bg-gray-800" title="Impostazioni Chiave API"><i class="ph-bold ph-gear text-base"></i></button>
                     <button id="btn-close-ai" class="text-textMuted hover:text-white transition-colors p-1.5 rounded hover:bg-gray-800"><i class="ph-bold ph-x text-base"></i></button>
                 </div>
-            </div>
-
-            <div id="ai-settings-panel" class="hidden flex-col p-4 bg-[#010409] border-b border-[#30363d]">
-                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Imposta Chiave API Sicura</label>
-                <p class="text-[10px] text-gray-400 mb-3 leading-relaxed">Le chiavi pubblicate in chat vengono disattivate da Google. <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-400 hover:underline">Genera una chiave gratuita qui</a>.</p>
-                <input type="password" id="api-key-input" placeholder="Incolla la nuova API Key..." class="w-full bg-[#161b22] text-white text-xs border border-[#30363d] rounded-md p-2 mb-3 focus:border-purple-500 outline-none">
-                <button id="btn-save-key" class="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-md text-xs font-bold transition-all shadow-lg">Salva e Attiva IA</button>
             </div>
             
             <div class="p-2 bg-[#010409] border-b border-[#30363d] flex gap-2 overflow-x-auto custom-scrollbar-hidden">
@@ -165,14 +178,11 @@
             <div id="ai-chat-box" class="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-4 text-sm">
                 <div class="ai-msg bot">
                     <i class="ph-fill ph-robot text-purple-400 text-lg mb-1 block"></i>
-                    Sono pronto. Assicurati di aver impostato una chiave API valida cliccando sull'ingranaggio in alto.
+                    Sono pronto ad assisterti. Assicurati di inserire la tua chiave cliccando sull'icona ⚙️.
                 </div>
             </div>
 
             <div class="p-3 bg-[#010409] border-t border-[#30363d]">
-                <div id="ai-key-warning" class="hidden text-[10px] text-red-400 bg-red-900/20 p-2 mb-2 rounded border border-red-800/50">
-                    <i class="ph-bold ph-warning"></i> Nessuna chiave API salvata. Clicca sull'ingranaggio.
-                </div>
                 <form id="ai-form" class="relative">
                     <textarea id="ai-input" rows="2" class="w-full bg-[#161b22] text-white text-[13px] border border-[#30363d] rounded-lg pl-3 pr-10 py-2 focus:outline-none focus:border-purple-500 custom-scrollbar-hidden resize-none transition-colors" placeholder="Chiedi all'AI di agire sul testo..."></textarea>
                     <button type="submit" id="btn-send-ai" class="absolute right-2 bottom-2 p-1.5 bg-purple-600 hover:bg-purple-500 rounded-md text-white transition-all shadow-lg"><i class="ph-bold ph-paper-plane-right"></i></button>
@@ -182,6 +192,6 @@
 
     </div>
 
-    <script type="module" src="app.js"></script>
+    <script type="module" src="app.js?v=5"></script>
 </body>
 </html>

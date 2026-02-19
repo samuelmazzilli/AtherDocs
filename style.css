@@ -5,9 +5,15 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #484f58; }
 .custom-scrollbar-hidden::-webkit-scrollbar { display: none; }
 
-/* Font */
 .ql-font-serif { font-family: 'Merriweather', serif; }
 .ql-font-monospace { font-family: 'JetBrains Mono', monospace; }
+
+/* NOTIFICHE TOAST */
+.toast { padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; color: white; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: slideIn 0.3s ease-out forwards; pointer-events: auto;}
+.toast.error { background: #7f1d1d; border: 1px solid #dc2626; }
+.toast.success { background: #14532d; border: 1px solid #16a34a; }
+.toast.info { background: #1e3a8a; border: 1px solid #2563eb; }
+@keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
 /* AI UI */
 body.ai-open #main-editor-area { margin-right: 350px; }
