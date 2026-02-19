@@ -1,0 +1,51 @@
+# Dipendenze (Il buco nero del disco fisso)
+node_modules/
+.pnp
+.pnp.js
+
+# Output di Build (Generati automaticamente da Vite, inutile salvarli)
+dist/
+dist-ssr/
+build/
+
+# Log di sistema e di pacchetti
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# 🔒 Variabili d'Ambiente e Sicurezza (CRITICO)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+
+# File temporanei, Cache e Coperture di test
+.eslintcache
+.stylelintcache
+coverage/
+.nyc_output
+*.tsbuildinfo
+
+# File generati dai Sistemi Operativi
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# File di configurazione degli Editor (VS Code, WebStorm, ecc.)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
