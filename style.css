@@ -41,7 +41,7 @@ body.ai-open #ai-sidebar { transform: translateX(0); }
 .dropdown-item { width: 100%; text-align: left; padding: 8px 16px; font-size: 13px; color: #c9d1d9; display: flex; align-items: center; gap: 8px; transition: 0.2s; border: none; background: transparent; cursor: pointer; }
 .dropdown-item:hover { background: #2f81f7; color: white; }
 
-/* FIX TOOLBAR QUILL E IMMAGINI */
+/* FIX TOOLBAR E IMMAGINI */
 .ql-toolbar.ql-snow { border: none !important; padding: 0 !important; display: flex !important; flex-wrap: wrap; background: transparent !important; font-family: 'Inter', sans-serif !important; }
 .ql-formats { margin-right: 6px !important; margin-bottom: 2px; display: flex; align-items: center; background: #010409; border: 1px solid #30363d; border-radius: 6px; padding: 2px; }
 .ql-snow .ql-picker { color: #8b949e !important; height: 26px !important; display: flex !important; align-items: center;}
@@ -52,7 +52,7 @@ body.ai-open #ai-sidebar { transform: translateX(0); }
 .ql-snow .ql-fill { fill: #8b949e !important; }
 .ql-snow button:hover .ql-stroke, .ql-snow button.ql-active .ql-stroke { stroke: #c9d1d9 !important; }
 
-/* EDITOR A4 & MEDIA */
+/* EDITOR & MEDIA */
 .ql-container.ql-snow { border: none !important; font-family: 'Inter', sans-serif !important; font-size: 1.05rem !important; }
 .ql-editor { padding: 60px 80px !important; line-height: 1.7; color: #c9d1d9; }
 .ql-editor h1, .ql-editor h2 { color: white; margin-bottom: 15px; border-bottom: 1px solid #30363d; padding-bottom: 10px; font-weight: 600; margin-top: 1.5em; }
@@ -62,9 +62,9 @@ body.ai-open #ai-sidebar { transform: translateX(0); }
 .ql-editor pre.ql-syntax { background: #010409; border: 1px solid #30363d; border-radius: 6px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 0.9em; overflow-x: auto; color: #e2e8f0; }
 .ql-editor.ql-blank::before { color: #5a6370; left: 80px !important; font-style: normal; }
 
-/* FIX IMMAGINI */
+/* FIX IMMAGINI E PDF NATIVI */
 .ql-editor img { max-width: 100%; border-radius: 8px; border: 1px solid #30363d; margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: block; }
-.pdf-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; margin: 10px 0; background: #1e1a2e; border: 1px solid #a855f7; border-radius: 6px; color: #d8b4fe; text-decoration: none !important; font-weight: bold; font-family: 'Inter', sans-serif; transition: 0.2s;}
+.pdf-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; margin: 10px 0; background: #1e1a2e; border: 1px solid #a855f7; border-radius: 6px; color: #d8b4fe; text-decoration: none !important; font-weight: bold; font-family: 'Inter', sans-serif; transition: 0.2s; cursor: pointer;}
 .pdf-badge:hover { background: #2d2442; color: #fff;}
 
 /* TREE UI */
