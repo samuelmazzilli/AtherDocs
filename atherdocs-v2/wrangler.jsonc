@@ -1,8 +1,5 @@
 {
-  "name": "atherdocs-v2",
+  "name": "atherdocs",
   "compatibility_date": "2026-02-19",
-  "pages_build_output_dir": "./dist", // <--- AGGIUNGI QUESTA RIGA!
-  "assets": {
-    "directory": "./dist"
-  }
+  "pages_build_output_dir": "dist"
 }
