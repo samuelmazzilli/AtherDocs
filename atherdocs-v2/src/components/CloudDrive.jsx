@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../supbaseCLient.js';
 import { Cloud, Lock, Mail, Key, LogOut, FileText, Plus, Server } from 'lucide-react';
 
 const CloudDrive = () => {
