@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js'; // <--- QUESTA RIGA È VITALE
 import { Cloud, Lock, Mail, Key, LogOut, FileText, Plus, Server } from 'lucide-react';
 
 // INIZIALIZZAZIONE DIRETTA: nessun file esterno da cercare!
