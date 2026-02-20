@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supbaseCLient.js';
 import { Cloud, Lock, Mail, Key, LogOut, FileText, Plus, Server } from 'lucide-react';
+
+// INIZIALIZZAZIONE DIRETTA: nessun file esterno da cercare!
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
 
 const CloudDrive = () => {
   const [session, setSession] = useState(null);
